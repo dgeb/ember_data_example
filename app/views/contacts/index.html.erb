@@ -1,25 +1,11 @@
-<h1>Listing contacts</h1>
+<h1>Contacts</h1>
 
-<table>
-  <tr>
-    <th>First name</th>
-    <th>Last name</th>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
+<script type="text/x-handlebars">
+  {{ view App.ListContactsView }}
+</script>
 
-<% @contacts.each do |contact| %>
-  <tr>
-    <td><%= contact.first_name %></td>
-    <td><%= contact.last_name %></td>
-    <td><%= link_to 'Show', contact %></td>
-    <td><%= link_to 'Edit', edit_contact_path(contact) %></td>
-    <td><%= link_to 'Destroy', contact, confirm: 'Are you sure?', method: :delete %></td>
-  </tr>
-<% end %>
-</table>
-
-<br />
-
-<%= link_to 'New Contact', new_contact_path %>
+<script type="text/javascript">
+  $(function() {
+    App.contactsController.loadAll(<%= @contacts.to_json.html_safe %>);
+  });
+</script>

@@ -1,0 +1,9 @@
+<td></td>
+<td>
+  <form>
+    {{textField firstName}}
+    {{textField lastName}}
+    <button type="submit">Create</button>
+  </form>
+</td>
+<td></td>
