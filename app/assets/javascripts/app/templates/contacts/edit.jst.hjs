@@ -1,5 +1,5 @@
 {{#with contact}}
-  {{textField firstName}}
-  {{textField lastName}}
+  {{textField first_name}}
+  {{textField last_name}}
 {{/with}}
 <button type="submit">Save</button>

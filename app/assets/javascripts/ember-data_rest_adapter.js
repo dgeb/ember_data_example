@@ -12,9 +12,12 @@ DS.restAdapter = DS.Adapter.create({
   },
 
   update: function(store, type, model) {
+    var data = {};
+    data[type.prototype.resourceName] = model.get('data');
+
     jQuery.ajax({
       url: type.prototype.resourceUrl.fmt(model.get('id')),
-      data: DS.utils.constructResource(type.prototype.resourceName, model.get('data')),
+      data: data,
       dataType: 'json',
       type: 'PUT',
       success: function(data) {
@@ -24,9 +27,12 @@ DS.restAdapter = DS.Adapter.create({
   },
 
   create: function(store, type, model) {
+    var data = {};
+    data[type.prototype.resourceName] = model.get('data');
+
     jQuery.ajax({
       url: type.prototype.collectionUrl.fmt(model.get('id')),
-      data: DS.utils.constructResource(type.prototype.resourceName, model.get('data')),
+      data: data,
       dataType: 'json',
       type: 'POST',
       success: function(data) {

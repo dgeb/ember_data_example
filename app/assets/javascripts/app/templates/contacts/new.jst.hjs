@@ -1,8 +1,8 @@
 <td></td>
 <td>
   <form>
-    {{textField firstName}}
-    {{textField lastName}}
+    {{textField first_name}}
+    {{textField last_name}}
     <button type="submit">Create</button>
   </form>
 </td>

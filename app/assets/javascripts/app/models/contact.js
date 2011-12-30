@@ -3,13 +3,10 @@ App.Contact  = DS.Model.extend({
   resourceUrl: '/contacts/%@',
   resourceName: 'contact',
 
-  firstName: DS.attr('string'),
-  lastName:  DS.attr('string'),
+  first_name: DS.attr('string'),
+  last_name:  DS.attr('string'),
 
   fullName: Em.computed(function() {
-    var firstName = this.get('firstName');
-    var lastName = this.get('lastName');
-
-    return firstName + ' ' + lastName;
-  }).property('firstName', 'lastName')
+    return this.get('first_name') + ' ' + this.get('last_name');
+  }).property('first_name', 'last_name')
 });

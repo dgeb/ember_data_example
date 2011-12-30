@@ -6,8 +6,8 @@ App.EditContactView = Em.View.extend({
     evt.preventDefault();
 
     var contact = this.get("contact");
-    contact.set("firstName", this.$().find("#firstName").val());
-    contact.set("lastName", this.$().find("#lastName").val());
+    contact.set("first_name", this.$().find("#first_name").val());
+    contact.set("last_name", this.$().find("#last_name").val());
     App.store.commit();
 
     // hide edit form

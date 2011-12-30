@@ -6,8 +6,8 @@ App.NewContactView = Em.View.extend({
     evt.preventDefault();
 
     var contact = App.store.create(App.Contact, {
-      firstName: this.$().find("#firstName").val(),
-      lastName: this.$().find("#lastName").val()
+      first_name: this.$().find("#first_name").val(),
+      last_name: this.$().find("#last_name").val()
     });
     App.store.commit();
 
