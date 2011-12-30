@@ -1,6 +1,6 @@
 App.ListContactsView = Em.View.extend({
   templateName: 'app/templates/contacts/list',
-  contactsBinding: 'App.contactsController.allContacts',
+  contactsBinding: 'App.contactsController',
 
   newView: Em.View.extend({
     tagName: 'span',
