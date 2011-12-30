@@ -13,4 +13,4 @@ It does not include error handling, as it's unclear how this should be integrate
 
 The contact listing is initially loaded from data embedded in the html to improve performance (see views/contacts/index.html.erb).
 
-This initial version is quite buggy. Please help me improve it by filing issues and pull requests!
+This initial version is quite buggy. Please help improve it by filing issues and pull requests!
