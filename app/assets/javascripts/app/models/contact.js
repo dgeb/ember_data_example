@@ -8,7 +8,7 @@ App.Contact  = DS.Model.extend({
 
   fullName: Em.computed(function() {
     return this.get('first_name') + ' ' + this.get('last_name');
-  }).property('first_name', 'last_name'),
+  }).property('first_name', 'last_name')
 });
 
 App.Contact.reopenClass({
