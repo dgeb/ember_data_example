@@ -240,11 +240,6 @@ DS.Store = SC.Object.extend({
       set(DS, 'defaultStore', this);
     }
 
-    var adapter = get(this, 'adapter');
-    if (typeof adapter === 'string') {
-      set(this, 'adapter', getPath(this, adapter));
-    }
-
     set(this, 'data', []);
     set(this, 'ids', {});
     set(this, 'models', []);
@@ -277,6 +272,14 @@ DS.Store = SC.Object.extend({
     @property {DS.Adapter|String}
   */
   adapter: null,
+
+  _adapter: SC.computed(function() {
+    var adapter = get(this, 'adapter');
+    if (typeof adapter === 'string') {
+      return getPath(this, adapter);
+    }
+    return adapter;
+  }).property('adapter').cacheable(),
 
   clientIdCounter: -1,
 
@@ -385,7 +388,9 @@ DS.Store = SC.Object.extend({
       model = this.createModel(type, clientId);
 
       // let the adapter set the data, possibly async
-      get(this, 'adapter').find(this, type, id);
+      var adapter = get(this, '_adapter');
+      if (adapter && adapter.find) { adapter.find(this, type, id); }
+      else { throw fmt("Adapter is either null or do not implement `find` method", this); }
     }
 
     return model;
@@ -416,7 +421,9 @@ DS.Store = SC.Object.extend({
     }
 
     if ((needed && get(needed, 'length') > 0) || query) {
-      get(this, 'adapter').findMany(this, type, needed, query);
+      var adapter = get(this, '_adapter');
+      if (adapter && adapter.findMany) { adapter.findMany(this, type, needed, query); }
+      else { throw fmt("Adapter is either null or do not implement `findMany` method", this); }
     }
 
     return this.createModelArray(type, clientIds);
@@ -424,7 +431,9 @@ DS.Store = SC.Object.extend({
 
   findQuery: function(type, query) {
     var array = DS.AdapterPopulatedModelArray.create({ type: type, content: Ember.A([]), store: this });
-    get(this, 'adapter').findQuery(this, type, query, array);
+    var adapter = get(this, '_adapter');
+    if (adapter && adapter.findQuery) { adapter.findQuery(this, type, query, array); }
+    else { throw fmt("Adapter is either null or do not implement `findQuery` method", this); }
     return array;
   },
 
@@ -432,8 +441,8 @@ DS.Store = SC.Object.extend({
     var array = DS.ModelArray.create({ type: type, content: Ember.A([]), store: this });
     this.registerModelArray(array, type);
 
-    var adapter = get(this, 'adapter');
-    if (adapter.findAll) { adapter.findAll(this, type); }
+    var adapter = get(this, '_adapter');
+    if (adapter && adapter.findAll) { adapter.findAll(this, type); }
 
     return array;
   },
@@ -559,16 +568,32 @@ DS.Store = SC.Object.extend({
       }
     };
 
-    get(this, 'adapter').commit(this, commitDetails);
+    var adapter = get(this, '_adapter');
+    if (adapter && adapter.commit) { adapter.commit(this, commitDetails); }
+    else { throw fmt("Adapter is either null or do not implement `commit` method", this); }
   },
 
-  didUpdateModels: function(array) {
-    array.forEach(function(model) {
-      model.adapterDidUpdate();
-    });
+  didUpdateModels: function(array, hashes) {
+    if (arguments.length === 2) {
+      array.forEach(function(model, idx) {
+        this.didUpdateModel(model, hashes[idx]);
+      }, this);
+    } else {
+      array.forEach(function(model) {
+        this.didUpdateModel(model);
+      }, this);
+    }
   },
 
-  didUpdateModel: function(model) {
+  didUpdateModel: function(model, hash) {
+    if (arguments.length === 2) {
+      var clientId = get(model, 'clientId');
+      var data = this.clientIdToHashMap(model.constructor);
+
+      data[clientId] = hash;
+      model.set('data', hash);
+    }
+
     model.adapterDidUpdate();
   },
 
@@ -594,9 +619,8 @@ DS.Store = SC.Object.extend({
       id = hash[primaryKey];
       clientId = get(model, 'clientId');
 
-      // TODO: Notify models that data has changed?
       data[clientId] = hash;
-      model.set('data', hash);
+      set(model, 'data', hash);
 
       idToClientIdMap[id] = clientId;
       idList.push(id);
@@ -618,6 +642,7 @@ DS.Store = SC.Object.extend({
 
     clientId = get(model, 'clientId');
     data[clientId] = hash;
+    set(model, 'data', hash);
 
     idToClientIdMap[id] = clientId;
     idList.push(id);
@@ -1303,11 +1328,48 @@ DS.attr.transforms = {
 
   date: {
     from: function(serialized) {
-      return new Date(serialized);
+      var type = typeof serialized;
+
+      if (type === "string" || type === "number") {
+        return new Date(serialized);
+      } else if (serialized == null) {
+        // if the value is not present in the data,
+        // return undefined, not null.
+        return serialized;
+      } else {
+        return null;
+      }
     },
 
-    to: function(deserialized) {
-      return deserialized.toString();
+    to: function(date) {
+      if (date instanceof Date) {
+        var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        var pad = function(num) {
+          return num < 10 ? "0"+num : ""+num;
+        };
+
+        var utcYear = date.getUTCFullYear(),
+            utcMonth = date.getUTCMonth(),
+            utcDayOfMonth = date.getUTCDate(),
+            utcDay = date.getUTCDay(),
+            utcHours = date.getUTCHours(),
+            utcMinutes = date.getUTCMinutes(),
+            utcSeconds = date.getUTCSeconds();
+
+
+        var dayOfWeek = days[utcDay];
+        var dayOfMonth = pad(utcDayOfMonth);
+        var month = months[utcMonth];
+
+        return dayOfWeek + ", " + dayOfMonth + " " + month + " " + utcYear + " " +
+               pad(utcHours) + ":" + pad(utcMinutes) + ":" + pad(utcSeconds) + " GMT";
+      } else if (date === undefined) {
+        return undefined;
+      } else {
+        return null;
+      }
     }
   }
 };
