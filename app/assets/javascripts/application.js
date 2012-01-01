@@ -7,6 +7,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require ember
+//= require ember_extensions
 //= require ember_data
 //= require ember_data_extensions
 //= require app

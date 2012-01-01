@@ -5,14 +5,22 @@ App.NewContactView = Em.View.extend({
   submit: function(evt) {
     evt.preventDefault();
 
-    var contact = App.store.create(App.Contact, {
+    var data = {
       first_name: this.$().find("#first_name").val(),
       last_name: this.$().find("#last_name").val()
-    });
-    App.store.commit();
+    };
+    var valid = App.Contact.validateProperties(data);
 
-    // hide new contact form
-    this.get("parentView").set('showNew', false);
+    if (valid === true) {
+      var contact = App.store.create(App.Contact, data);
+      App.store.commit();
+
+      // hide form
+      this.get("parentView").set('showNew', false);
+    }
+    else {
+      alert(valid);
+    }
 
     // prevent event from bubbling up
     return false;

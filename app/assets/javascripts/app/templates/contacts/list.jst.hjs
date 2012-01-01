@@ -15,10 +15,6 @@
   </tbody>
 </table>
 <div class="commands">
-  {{#view newView}}
-    {{link "New Contact"}}
-  {{/view}}
-  {{#view refreshView}}
-    {{link "Refresh Listing"}}
-  {{/view}}
+  {{#view Ember.Link action="newRecord"}}New Contact{{/view}}
+  {{#view Ember.Link action="refreshListing"}}Refresh Listing{{/view}}
 </div>

@@ -5,13 +5,23 @@ App.EditContactView = Em.View.extend({
   submit: function(evt) {
     evt.preventDefault();
 
-    var contact = this.get("contact");
-    contact.set("first_name", this.$().find("#first_name").val());
-    contact.set("last_name", this.$().find("#last_name").val());
-    App.store.commit();
+    var data = {
+      first_name: this.$().find("#first_name").val(),
+      last_name: this.$().find("#last_name").val()
+    };
+    var valid = App.Contact.validateProperties(data);
 
-    // hide edit form
-    this.showView.stopEditing();
+    if (valid === true) {
+      var contact = this.get("contact");
+      contact.setProperties(data);
+      App.store.commit();
+
+      // hide form
+      this.get("parentView").stopEditing();
+    }
+    else {
+      alert(valid);
+    }
 
     // prevent event from bubbling up
     return false;
