@@ -8,7 +8,6 @@
 //= require jquery_ujs
 //= require ember
 //= require ember_data
-//= require ember_data_store_extensions
-//= require ember_data_rest_adapter
+//= require ember_data_extensions
 //= require app
 //= require_tree ./app
