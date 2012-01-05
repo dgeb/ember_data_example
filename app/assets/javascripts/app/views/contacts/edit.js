@@ -1,29 +1,24 @@
-App.EditContactView = Em.View.extend({
+App.EditContactView = Em.Form.extend({
   templateName: 'app/templates/contacts/edit',
-  tagName: 'form',
 
-  submit: function(evt) {
-    evt.preventDefault();
+  submitForm: function() {
+    var self = this;
 
-    var data = {
-      first_name: this.$().find("#first_name").val(),
-      last_name: this.$().find("#last_name").val()
-    };
-    var valid = App.Contact.validateProperties(data);
+    var contact = this.get("contact");
 
-    if (valid === true) {
-      var contact = this.get("contact");
+    var data = this.serialize();
+
+    var validationErrors = contact.validate(data);
+
+    if (validationErrors !== undefined) {
+      App.displayError(validationErrors);
+    }
+    else {
       contact.setProperties(data);
       App.store.commit();
 
       // hide form
-      this.get("parentView").stopEditing();
+      self.get("parentView").stopEditing();
     }
-    else {
-      alert(valid);
-    }
-
-    // prevent event from bubbling up
-    return false;
   }
 });

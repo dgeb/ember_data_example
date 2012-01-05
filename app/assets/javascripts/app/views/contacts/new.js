@@ -1,28 +1,29 @@
-App.NewContactView = Em.View.extend({
-  templateName: 'app/templates/contacts/new',
-  tagName: 'tr',
+App.NewContactView = Ember.Form.extend({
+  templateName: 'app/templates/contacts/edit',
 
-  submit: function(evt) {
-    evt.preventDefault();
+  init: function() {
+    this.set("contact", App.Contact.create());
+    this._super();
+  },
 
-    var data = {
-      first_name: this.$().find("#first_name").val(),
-      last_name: this.$().find("#last_name").val()
-    };
-    var valid = App.Contact.validateProperties(data);
+  submitForm: function() {
+    var self = this;
 
-    if (valid === true) {
-      var contact = App.store.create(App.Contact, data);
+    var contact = this.get("contact");
+
+    var data = this.serialize();
+
+    var validationErrors = contact.validate(data);
+
+    if (validationErrors !== undefined) {
+      App.displayError(validationErrors);
+    }
+    else {
+      contact = App.store.create(App.Contact, data);
       App.store.commit();
 
       // hide form
       this.get("parentView").set('showNew', false);
     }
-    else {
-      alert(valid);
-    }
-
-    // prevent event from bubbling up
-    return false;
   }
 });

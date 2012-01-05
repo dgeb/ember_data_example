@@ -1,11 +1,10 @@
 Ember.Link = Ember.View.extend(Ember.TargetActionSupport, {
-  classNames: ['ember-link'],
-
-  tagName: 'a',
+  classNames:        ['ember-link'],
+  tagName:           'a',
   attributeBindings: ['href'],
-  href: '#',
-  target: 'parentView',
-  propagateEvents: false,
+  href:              '#',
+  target:            'parentView',
+  propagateEvents:   false,
 
   click: function(evt) {
     evt.preventDefault();

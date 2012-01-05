@@ -1,5 +1,0 @@
-{{#with contact}}
-  {{textField first_name}}
-  {{textField last_name}}
-{{/with}}
-<button type="submit">Save</button>

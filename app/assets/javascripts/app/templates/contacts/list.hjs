@@ -3,6 +3,7 @@
     <tr>
       <th>ID</th>
       <th>Name</th>
+      <th />
     </tr>
   </thead>
   <tbody>
@@ -10,7 +11,12 @@
     {{view App.ShowContactView contactBinding="this"}}
   {{/each}}
   {{#if showNew}}
-    {{view App.NewContactView}}
+    <tr>
+      <td></td>
+      <td colspan="2">
+        {{view App.NewContactView}}
+      </td>
+    </tr>
   {{/if}}
   </tbody>
 </table>

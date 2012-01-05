@@ -84,10 +84,10 @@ DS.ModelArray = SC.ArrayProxy.extend({
   },
 
   arrayDidChange: function(array, index, removed, added) {
-    this._super(array, index, removed, added);
-
     var modelCache = get(this, 'modelCache');
     modelCache.replace(index, 0, Array(added));
+
+    this._super(array, index, removed, added);
   },
 
   arrayWillChange: function(array, index, removed, added) {
@@ -139,6 +139,196 @@ DS.AdapterPopulatedModelArray = DS.ModelArray.extend({
     set(this, 'content', Ember.A(clientIds));
     set(this, 'isLoaded', true);
     this.endPropertyChanges();
+  }
+});
+
+})({});
+
+
+(function(exports) {
+var get = Ember.get, set = Ember.set, getPath = Ember.getPath, fmt = Ember.String.fmt;
+
+var OrderedSet = SC.Object.extend({
+  init: function() {
+    this.clear();
+  },
+
+  clear: function() {
+    this.set('presenceSet', {});
+    this.set('list', SC.NativeArray.apply([]));
+  },
+
+  add: function(obj) {
+    var guid = SC.guidFor(obj),
+        presenceSet = get(this, 'presenceSet'),
+        list = get(this, 'list');
+
+    if (guid in presenceSet) { return; }
+
+    presenceSet[guid] = true;
+    list.pushObject(obj);
+  },
+
+  remove: function(obj) {
+    var guid = SC.guidFor(obj),
+        presenceSet = get(this, 'presenceSet'),
+        list = get(this, 'list');
+
+    delete presenceSet[guid];
+    list.removeObject(obj);
+  },
+
+  isEmpty: function() {
+    return getPath(this, 'list.length') === 0;
+  },
+
+  forEach: function(fn, self) {
+    get(this, 'list').forEach(function(item) {
+      fn.call(self, item);
+    });
+  },
+
+  toArray: function() {
+    return get(this, 'list').slice();
+  }
+});
+
+/**
+  A Hash stores values indexed by keys. Unlike JavaScript's
+  default Objects, the keys of a Hash can be any JavaScript
+  object.
+
+  Internally, a Hash has two data structures:
+
+    `keys`: an OrderedSet of all of the existing keys
+    `values`: a JavaScript Object indexed by the
+      Ember.guidFor(key)
+
+  When a key/value pair is added for the first time, we
+  add the key to the `keys` OrderedSet, and create or
+  replace an entry in `values`. When an entry is deleted,
+  we delete its entry in `keys` and `values`.
+*/
+
+var Hash = SC.Object.extend({
+  init: function() {
+    set(this, 'keys', OrderedSet.create());
+    set(this, 'values', {});
+  },
+
+  add: function(key, value) {
+    var keys = get(this, 'keys'), values = get(this, 'values');
+    var guid = Ember.guidFor(key);
+
+    keys.add(key);
+    values[guid] = value;
+
+    return value;
+  },
+
+  remove: function(key) {
+    var keys = get(this, 'keys'), values = get(this, 'values');
+    var guid = Ember.guidFor(key), value;
+
+    keys.remove(key);
+
+    value = values[guid];
+    delete values[guid];
+
+    return value;
+  },
+
+  fetch: function(key) {
+    var values = get(this, 'values');
+    var guid = Ember.guidFor(key);
+
+    return values[guid];
+  },
+
+  forEach: function(fn, binding) {
+    var keys = get(this, 'keys'), values = get(this, 'values');
+
+    keys.forEach(function(key) {
+      var guid = Ember.guidFor(key);
+      fn.call(binding, key, values[guid]);
+    });
+  }
+});
+
+DS.Transaction = Ember.Object.extend({
+  init: function() {
+    set(this, 'dirty', {
+      created: Hash.create(),
+      updated: Hash.create(),
+      deleted: Hash.create()
+    });
+  },
+
+  create: function(type, hash) {
+    var store = get(this, 'store');
+
+    return store.create(type, hash, this);
+  },
+
+  add: function(model) {
+    var modelTransaction = get(model, 'transaction');
+    ember_assert("Models cannot belong to more than one transaction at a time.", !modelTransaction);
+
+    set(model, 'transaction', this);
+  },
+
+  modelBecameDirty: function(kind, model) {
+    var dirty = get(get(this, 'dirty'), kind),
+        type = model.constructor;
+
+    var models = dirty.fetch(type);
+
+    models = models || dirty.add(type, OrderedSet.create());
+    models.add(model);
+  },
+
+  modelBecameClean: function(kind, model) {
+    var dirty = get(get(this, 'dirty'), kind),
+        type = model.constructor;
+
+    var models = dirty.fetch(type);
+    models.remove(model);
+
+    set(model, 'transaction', null);
+  },
+
+  commit: function() {
+    var dirtyMap = get(this, 'dirty');
+
+    var iterate = function(kind, fn, binding) {
+      var dirty = get(dirtyMap, kind);
+
+      dirty.forEach(function(type, models) {
+        if (models.isEmpty()) { return; }
+
+        models.forEach(function(model) { model.willCommit(); });
+        fn.call(binding, type, models.toArray());
+      });
+    };
+
+    var commitDetails = {
+      updated: {
+        eachType: function(fn, binding) { iterate('updated', fn, binding); }
+      },
+
+      created: {
+        eachType: function(fn, binding) { iterate('created', fn, binding); }
+      },
+
+      deleted: {
+        eachType: function(fn, binding) { iterate('deleted', fn, binding); }
+      }
+    };
+
+    var store = get(this, 'store');
+    var adapter = get(store, '_adapter');
+    if (adapter && adapter.commit) { adapter.commit(store, commitDetails); }
+    else { throw fmt("Adapter is either null or do not implement `commit` method", this); }
   }
 });
 
@@ -245,11 +435,13 @@ DS.Store = SC.Object.extend({
     set(this, 'models', []);
     set(this, 'modelArrays', []);
     set(this, 'modelArraysByClientId', {});
-    set(this, 'updatedTypes', OrderedSet.create());
-    set(this, 'createdTypes', OrderedSet.create());
-    set(this, 'deletedTypes', OrderedSet.create());
+    set(this, 'defaultTransaction', DS.Transaction.create({ store: this }));
 
     return this._super();
+  },
+
+  transaction: function() {
+    return DS.Transaction.create({ store: this });
   },
 
   modelArraysForClientId: function(clientId) {
@@ -287,23 +479,29 @@ DS.Store = SC.Object.extend({
   // . CREATE NEW MODEL .
   // ....................
 
-  create: function(type, hash) {
+  create: function(type, hash, transaction) {
     hash = hash || {};
 
     var id = hash[getPath(type, 'proto.primaryKey')] || null;
 
-    var model = type.create({ data: hash || {}, store: this });
+    var model = type.create({
+      data: hash || {},
+      store: this,
+      transaction: transaction
+    });
+
     model.adapterDidCreate();
 
     var data = this.clientIdToHashMap(type);
     var models = get(this, 'models');
 
     var clientId = this.pushHash(hash, id, type);
-    this.updateModelArrays(type, clientId, hash);
 
     set(model, 'clientId', clientId);
 
-    get(this, 'models')[clientId] = model;
+    models[clientId] = model;
+
+    this.updateModelArrays(type, clientId, hash);
 
     return model;
   },
@@ -466,7 +664,6 @@ DS.Store = SC.Object.extend({
     this.updateModelArrays(type, clientId, hash);
   },
 
-
   // Internally, the store keeps two data structures representing
   // the dirty models.
   //
@@ -485,6 +682,7 @@ DS.Store = SC.Object.extend({
   //       sc3: [ thing1, thing2 ]
   //     }
   //   }
+  //
   //
   // Adapters receive an iterator that they can use to retrieve the
   // type and array at the same time:
@@ -509,68 +707,12 @@ DS.Store = SC.Object.extend({
   // `created`, `updated` and `deleted`. These correspond with the
   // commitDetails passed into the adapter's commit method.
 
-  modelBecameDirty: function(kind, model) {
-    var dirtyTypes = get(this, kind + 'Types'), type = model.constructor;
-    dirtyTypes.add(type);
-
-    var dirtyModels = this.typeMap(type)[kind + 'Models'];
-    dirtyModels.add(model);
-  },
-
-  modelBecameClean: function(kind, model) {
-    var dirtyTypes = get(this, kind + 'Types'), type = model.constructor;
-
-    var dirtyModels = this.typeMap(type)[kind + 'Models'];
-    dirtyModels.remove(model);
-
-    if (dirtyModels.isEmpty()) {
-      dirtyTypes.remove(type);
-    }
-  },
-
-  eachDirtyType: function(kind, fn, self) {
-    var types = get(this, kind + 'Types'), dirtyModels;
-
-    types.forEach(function(type) {
-      dirtyModels = this.typeMap(type)[kind + 'Models'];
-      fn.call(self, type, get(dirtyModels, 'list'));
-    }, this);
-  },
-
   // ..............
   // . PERSISTING .
   // ..............
 
   commit: function() {
-    var self = this;
-
-    var iterate = function(kind, fn, binding) {
-      self.eachDirtyType(kind, function(type, models) {
-        models.forEach(function(model) {
-          model.willCommit();
-        });
-
-        fn.call(binding, type, models);
-      });
-    };
-
-    var commitDetails = {
-      updated: {
-        eachType: function(fn, binding) { iterate('updated', fn, binding); }
-      },
-
-      created: {
-        eachType: function(fn, binding) { iterate('created', fn, binding); }
-      },
-
-      deleted: {
-        eachType: function(fn, binding) { iterate('deleted', fn, binding); }
-      }
-    };
-
-    var adapter = get(this, '_adapter');
-    if (adapter && adapter.commit) { adapter.commit(this, commitDetails); }
-    else { throw fmt("Adapter is either null or do not implement `commit` method", this); }
+    get(this, 'defaultTransaction').commit();
   },
 
   didUpdateModels: function(array, hashes) {
@@ -753,10 +895,7 @@ DS.Store = SC.Object.extend({
           idToCid: {},
           idList: [],
           cidList: [],
-          cidToHash: {},
-          updatedModels: OrderedSet.create(),
-          createdModels: OrderedSet.create(),
-          deletedModels: OrderedSet.create()
+          cidToHash: {}
       });
     }
   },
@@ -1011,18 +1150,20 @@ var states = {
 
         enter: function(manager) {
           var model = get(manager, 'model');
-          var store = get(model, 'store');
 
-          if (store) { store.modelBecameDirty('created', model); }
+          model.withTransaction(function (t) {
+            t.modelBecameDirty('created', model);
+          });
         },
 
         exit: function(manager) {
           var model = get(manager, 'model');
-          var store = get(model, 'store');
 
           model.didCreate();
 
-          if (store) { store.modelBecameClean('created', model); }
+          model.withTransaction(function (t) {
+            t.modelBecameClean('created', model);
+          });
         },
 
         setProperty: function(manager, context) {
@@ -1057,9 +1198,10 @@ var states = {
 
         enter: function(manager) {
           var model = get(manager, 'model');
-          var store = get(model, 'store');
 
-          if (store) { store.modelBecameDirty('updated', model); }
+          model.withTransaction(function(t) {
+            t.modelBecameDirty('updated', model);
+          });
         },
 
         willCommit: function(manager) {
@@ -1068,11 +1210,12 @@ var states = {
 
         exit: function(manager) {
           var model = get(manager, 'model');
-          var store = get(model, 'store');
 
           model.didUpdate();
 
-          if (store) { store.modelBecameClean('updated', model); }
+          model.withTransaction(function(t) {
+            t.modelBecameClean('updated', model);
+          });
         },
 
         saving: DS.State.create({
@@ -1098,8 +1241,11 @@ var states = {
 
         if (store) {
           store.removeFromModelArrays(model);
-          store.modelBecameDirty('deleted', model);
         }
+
+        model.withTransaction(function(t) {
+          t.modelBecameDirty('deleted', model);
+        });
       },
 
       willCommit: function(manager) {
@@ -1115,9 +1261,10 @@ var states = {
 
         exit: function(stateManager) {
           var model = get(stateManager, 'model');
-          var store = get(model, 'store');
 
-          store.modelBecameClean('deleted', model);
+          model.withTransaction(function(t) {
+            t.modelBecameClean('deleted', model);
+          });
         }
       }),
 
@@ -1152,8 +1299,11 @@ DS.Model = SC.Object.extend({
 
   clientId: null,
 
+  // because unknownProperty is used, any internal property
+  // must be initialized here.
   primaryKey: 'id',
   data: null,
+  transaction: null,
 
   didLoad: Ember.K,
   didUpdate: Ember.K,
@@ -1166,6 +1316,12 @@ DS.Model = SC.Object.extend({
 
     set(this, 'stateManager', stateManager);
     stateManager.goToState('empty');
+  },
+
+  withTransaction: function(fn) {
+    var transaction = get(this, 'transaction') || getPath(this, 'store.defaultTransaction');
+
+    if (transaction) { fn(transaction); }
   },
 
   setData: function(data) {
@@ -1332,7 +1488,7 @@ DS.attr.transforms = {
 
       if (type === "string" || type === "number") {
         return new Date(serialized);
-      } else if (serialized == null) {
+      } else if (serialized === null || serialized === undefined) {
         // if the value is not present in the data,
         // return undefined, not null.
         return serialized;

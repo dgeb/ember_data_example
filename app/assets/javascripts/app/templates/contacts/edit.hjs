@@ -1,0 +1,11 @@
+{{#with contact}}
+  {{textField first_name}}
+  {{textField last_name}}
+  <button type="submit">
+    {{#if id}}
+      Update
+    {{else}}
+      Create
+    {{/if}}
+  </button>
+{{/with}}
