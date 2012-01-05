@@ -20,6 +20,8 @@ App.NewContactView = Ember.Form.extend({
     }
     else {
       contact = App.store.create(App.Contact, data);
+
+      // not sure how to deal with commit errors
       App.store.commit();
 
       // hide form

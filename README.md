@@ -1,5 +1,7 @@
 # Ember Data Example
 
+IMPORTANT: THIS EXAMPLE IS NOT YET FULLY WORKING.
+
 This is a simple Rails 3.1 app created to try out Ember.js and the Data library recently created by the Ember.js team:
 https://github.com/emberjs/data
 

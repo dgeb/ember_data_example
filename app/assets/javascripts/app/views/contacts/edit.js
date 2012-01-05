@@ -15,6 +15,8 @@ App.EditContactView = Em.Form.extend({
     }
     else {
       contact.setProperties(data);
+
+      // not sure how to deal with commit errors
       App.store.commit();
 
       // hide form

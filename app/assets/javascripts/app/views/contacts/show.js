@@ -19,6 +19,8 @@ App.ShowContactView = Em.View.extend({
   destroyRecord: function() {
     var contact = this.get("contact");
     contact.deleteModel();
+
+    // not sure how to deal with commit errors
     App.store.commit();
   }
 });
