@@ -8,19 +8,19 @@ App.ShowContactView = Em.View.extend({
     return false;
   },
 
-  startEditing: function() {
+  showEdit: function() {
     this.set('isEditing', true);
   },
 
-  stopEditing: function() {
+  hideEdit: function() {
     this.set('isEditing', false);
   },
 
   destroyRecord: function() {
     var contact = this.get("contact");
-    contact.deleteModel();
+    contact.deleteRecord();
 
-    // not sure how to deal with commit errors
+    // TODO: not sure how to deal with commit errors
     App.store.commit();
   }
 });

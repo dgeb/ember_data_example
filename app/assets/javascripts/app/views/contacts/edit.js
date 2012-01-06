@@ -1,26 +1,31 @@
 App.EditContactView = Em.Form.extend({
   templateName: 'app/templates/contacts/edit',
 
+  afterRender: function() {
+    // TODO: Is this the right place to set focus? Without setTimeout, Chrome gets locked up
+    setTimeout(function() {this.$('input:first').focus();});
+  },
+
+  cancelForm: function() {
+    // TODO: This will not cancel edits to the contact, which we're editing directly.
+    // Two possible approaches to fix this:
+    // * edit a copy of the contact and apply changes in submitForm()
+    // * save the original version of the object and then revert to it on cancel
+    this.get("parentView").hideEdit();
+  },
+
   submitForm: function() {
-    var self = this;
-
     var contact = this.get("contact");
-
-    var data = this.serialize();
-
-    var validationErrors = contact.validate(data);
+    var validationErrors = contact.validate();
 
     if (validationErrors !== undefined) {
       App.displayError(validationErrors);
-    }
-    else {
-      contact.setProperties(data);
-
-      // not sure how to deal with commit errors
+    } else {
+      // TODO: not sure how to deal with commit errors
       App.store.commit();
 
       // hide form
-      self.get("parentView").stopEditing();
+      this.get("parentView").hideEdit();
     }
   }
 });

@@ -2,30 +2,36 @@ App.NewContactView = Ember.Form.extend({
   templateName: 'app/templates/contacts/edit',
 
   init: function() {
-    this.set("contact", App.Contact.create());
+    // TODO: ugh
+    this.set("contact", App.Contact.create({first_name: '', last_name: ''}));
     this._super();
   },
 
+  afterRender: function() {
+    // TODO: Is this the right place to set focus? Without setTimeout, Chrome gets locked up
+    setTimeout(function() {this.$('input:first').focus();});
+  },
+
+  cancelForm: function() {
+    this.get("parentView").hideNew();
+  },
+
   submitForm: function() {
-    var self = this;
-
     var contact = this.get("contact");
-
-    var data = this.serialize();
-
-    var validationErrors = contact.validate(data);
+    var validationErrors = contact.validate();
 
     if (validationErrors !== undefined) {
       App.displayError(validationErrors);
-    }
-    else {
-      contact = App.store.create(App.Contact, data);
+    } else {
+      // TODO: ugh
+      App.store.createRecord(App.Contact,
+                             {first_name: contact.get('first_name'),
+                              last_name:  contact.get('last_name')});
 
-      // not sure how to deal with commit errors
+      // TODO: not sure how to deal with commit errors
       App.store.commit();
 
-      // hide form
-      this.get("parentView").set('showNew', false);
+      this.get("parentView").hideNew();
     }
   }
 });

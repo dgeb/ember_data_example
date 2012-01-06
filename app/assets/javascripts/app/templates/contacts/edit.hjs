@@ -1,6 +1,6 @@
 {{#with contact}}
-  {{textField first_name}}
-  {{textField last_name}}
+  {{view Ember.TextField valueBinding="first_name"}}
+  {{view Ember.TextField valueBinding="last_name"}}
   <button type="submit">
     {{#if id}}
       Update
@@ -9,3 +9,4 @@
     {{/if}}
   </button>
 {{/with}}
+{{#view Ember.Link action="cancelForm"}}Cancel{{/view}}

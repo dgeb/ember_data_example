@@ -6,9 +6,11 @@ App.Contact  = DS.Model.extend({
   first_name: DS.attr('string'),
   last_name:  DS.attr('string'),
 
-  validate: function(userData) {
-    if (userData.first_name === '' || userData.last_name === '')
+  validate: function() {
+    if (this.get('first_name') === undefined || this.get('first_name') === '' ||
+        this.get('last_name') === undefined  || this.get('last_name') === '') {
       return 'Contacts require a first and a last name.';
+    }
   },
 
   fullName: Em.computed(function() {

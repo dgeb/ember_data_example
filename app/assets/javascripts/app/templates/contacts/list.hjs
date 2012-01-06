@@ -10,7 +10,7 @@
   {{#each contacts}}
     {{view App.ShowContactView contactBinding="this"}}
   {{/each}}
-  {{#if showNew}}
+  {{#if isNewVisible}}
     <tr>
       <td></td>
       <td colspan="2">
@@ -21,6 +21,6 @@
   </tbody>
 </table>
 <div class="commands">
-  {{#view Ember.Link action="newRecord"}}New Contact{{/view}}
+  {{#view Ember.Link action="showNew"}}New Contact{{/view}}
   {{#view Ember.Link action="refreshListing"}}Refresh Listing{{/view}}
 </div>

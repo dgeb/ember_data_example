@@ -8,7 +8,7 @@
 </td>
 <td class="commands">
   {{#unless isEditing}}
-    {{#view Ember.Link action="startEditing"}}Edit{{/view}}
+    {{#view Ember.Link action="showEdit"}}Edit{{/view}}
     {{#view Ember.Link action="destroyRecord"}}Destroy{{/view}}
   {{/unless}}
 </td>

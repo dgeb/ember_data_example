@@ -31,7 +31,7 @@ DS.restAdapter = DS.Adapter.create({
     });
   },
 
-  update: function(store, type, model) {
+  updateRecord: function(store, type, model) {
     var data = {};
     data[type.prototype.resourceName] = model.get('data');
 
@@ -46,7 +46,7 @@ DS.restAdapter = DS.Adapter.create({
     });
   },
 
-  create: function(store, type, model) {
+  createRecord: function(store, type, model) {
     var data = {};
     data[type.prototype.resourceName] = model.get('data');
 
@@ -61,7 +61,7 @@ DS.restAdapter = DS.Adapter.create({
     });
   },
 
-  deleteModel: function(store, type, model) {
+  deleteRecord: function(store, type, model) {
     jQuery.ajax({
       url: type.prototype.resourceUrl.fmt(model.get('id')),
       dataType: 'json',

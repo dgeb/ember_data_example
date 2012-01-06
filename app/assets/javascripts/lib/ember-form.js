@@ -10,19 +10,5 @@ Ember.Form = Ember.View.extend(Ember.TargetActionSupport, {
     evt.preventDefault();
     this.triggerAction();
     return Ember.get(this, 'propagateEvents');
-  },
-
-  // serialize form data as an object
-  serialize: function() {
-    var data = {},
-        a = this.$().serializeArray(),
-        o;
-
-    for (var i = 0; i < a.length; i++) {
-      o = a[i];
-      data[o.name] = o.value;
-    }
-
-    return data;
   }
 });

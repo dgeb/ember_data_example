@@ -7,7 +7,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require ./vendor/ember
-//= require ./vendor/ember-resource
+//= require ./vendor/ember-data
 //= require_tree ./lib
 //= require app
 //= require_tree ./app
