@@ -9,33 +9,33 @@ window.DS = SC.Namespace.create();
 DS.Adapter = SC.Object.extend({
   commit: function(store, commitDetails) {
     commitDetails.updated.eachType(function(type, array) {
-      this.updateMany(store, type, array.slice());
+      this.updateRecords(store, type, array.slice());
     }, this);
 
     commitDetails.created.eachType(function(type, array) {
-      this.createMany(store, type, array.slice());
+      this.createRecords(store, type, array.slice());
     }, this);
 
     commitDetails.deleted.eachType(function(type, array) {
-      this.deleteMany(store, type, array.slice());
+      this.deleteRecords(store, type, array.slice());
     }, this);
   },
 
-  createMany: function(store, type, models) {
+  createRecords: function(store, type, models) {
     models.forEach(function(model) {
-      this.create(store, type, model);
+      this.createRecord(store, type, model);
     }, this);
   },
 
-  updateMany: function(store, type, models) {
+  updateRecords: function(store, type, models) {
     models.forEach(function(model) {
-      this.update(store, type, model);
+      this.updateRecord(store, type, model);
     }, this);
   },
 
-  deleteMany: function(store, type, models) {
+  deleteRecords: function(store, type, models) {
     models.forEach(function(model) {
-      this.deleteModel(store, type, model);
+      this.deleteRecord(store, type, model);
     }, this);
   },
 
@@ -86,7 +86,7 @@ DS.ModelArray = SC.ArrayProxy.extend({
   arrayDidChange: function(array, index, removed, added) {
     var modelCache = get(this, 'modelCache');
     modelCache.replace(index, 0, Array(added));
-
+    
     this._super(array, index, removed, added);
   },
 
@@ -264,10 +264,10 @@ DS.Transaction = Ember.Object.extend({
     });
   },
 
-  create: function(type, hash) {
+  createRecord: function(type, hash) {
     var store = get(this, 'store');
 
-    return store.create(type, hash, this);
+    return store.createRecord(type, hash, this);
   },
 
   add: function(model) {
@@ -479,7 +479,7 @@ DS.Store = SC.Object.extend({
   // . CREATE NEW MODEL .
   // ....................
 
-  create: function(type, hash, transaction) {
+  createRecord: function(type, hash, transaction) {
     hash = hash || {};
 
     var id = hash[getPath(type, 'proto.primaryKey')] || null;
@@ -500,7 +500,7 @@ DS.Store = SC.Object.extend({
     set(model, 'clientId', clientId);
 
     models[clientId] = model;
-
+    
     this.updateModelArrays(type, clientId, hash);
 
     return model;
@@ -510,8 +510,8 @@ DS.Store = SC.Object.extend({
   // . DELETE MODEL .
   // ................
 
-  deleteModel: function(model) {
-    model.deleteModel();
+  deleteRecord: function(model) {
+    model.deleteRecord();
   },
 
   // ...............
@@ -715,19 +715,19 @@ DS.Store = SC.Object.extend({
     get(this, 'defaultTransaction').commit();
   },
 
-  didUpdateModels: function(array, hashes) {
+  didUpdateRecords: function(array, hashes) {
     if (arguments.length === 2) {
       array.forEach(function(model, idx) {
-        this.didUpdateModel(model, hashes[idx]);
+        this.didUpdateRecord(model, hashes[idx]);
       }, this);
     } else {
       array.forEach(function(model) {
-        this.didUpdateModel(model);
+        this.didUpdateRecord(model);
       }, this);
     }
   },
 
-  didUpdateModel: function(model, hash) {
+  didUpdateRecord: function(model, hash) {
     if (arguments.length === 2) {
       var clientId = get(model, 'clientId');
       var data = this.clientIdToHashMap(model.constructor);
@@ -739,17 +739,17 @@ DS.Store = SC.Object.extend({
     model.adapterDidUpdate();
   },
 
-  didDeleteModels: function(array) {
+  didDeleteRecords: function(array) {
     array.forEach(function(model) {
       model.adapterDidDelete();
     });
   },
 
-  didDeleteModel: function(model) {
+  didDeleteRecord: function(model) {
     model.adapterDidDelete();
   },
 
-  didCreateModels: function(type, array, hashes) {
+  didCreateRecords: function(type, array, hashes) {
     var id, clientId, primaryKey = getPath(type, 'proto.primaryKey');
 
     var idToClientIdMap = this.idToClientIdMap(type);
@@ -771,7 +771,7 @@ DS.Store = SC.Object.extend({
     }
   },
 
-  didCreateModel: function(model, hash) {
+  didCreateRecord: function(model, hash) {
     var type = model.constructor;
 
     var id, clientId, primaryKey = getPath(type, 'proto.primaryKey');
@@ -1334,9 +1334,14 @@ DS.Model = SC.Object.extend({
     stateManager.send('setProperty', { key: key, value: value });
   },
 
-  "deleteModel": function() {
+  deleteRecord: function() {
     var stateManager = get(this, 'stateManager');
     stateManager.send('delete');
+  },
+
+  destroy: function() {
+    this.deleteRecord();
+    this._super();
   },
 
   loadingData: function() {
