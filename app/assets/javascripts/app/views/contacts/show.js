@@ -4,7 +4,7 @@ App.ShowContactView = Em.View.extend({
   tagName: 'tr',
 
   doubleClick: function(evt) {
-    this.startEditing();
+    this.showEdit();
     return false;
   },
 
