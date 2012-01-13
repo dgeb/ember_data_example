@@ -18,57 +18,19 @@ DS.Store.reopen({
   }
 });
 
-DS.restAdapter = DS.Adapter.create({
-  find: function(store, type, id) {
-    jQuery.getJSON(type.prototype.resourceUrl.fmt(id), function(data) {
-      store.load(type, id, data);
-    });
-  },
+// Add commit() method to adapter, as suggested in ember-data readme
+DS.RESTAdapter.reopenClass({
+  commit: function(store, commitDetails) {
+    commitDetails.updated.eachType(function(type, array) {
+      this.updateRecords(store, type, array.slice());
+    }, this);
 
-  findAll: function(store, type) {
-    jQuery.getJSON(type.prototype.collectionUrl, function(data) {
-      store.loadArray(type, data);
-    });
-  },
+    commitDetails.created.eachType(function(type, array) {
+      this.createRecords(store, type, array.slice());
+    }, this);
 
-  updateRecord: function(store, type, model) {
-    var data = {};
-    data[type.prototype.resourceName] = model.get('data');
-
-    jQuery.ajax({
-      url: type.prototype.resourceUrl.fmt(model.get('id')),
-      data: data,
-      dataType: 'json',
-      type: 'PUT',
-      success: function(data) {
-        store.didUpdateModel(model, data);
-      }
-    });
-  },
-
-  createRecord: function(store, type, model) {
-    var data = {};
-    data[type.prototype.resourceName] = model.get('data');
-
-    jQuery.ajax({
-      url: type.prototype.collectionUrl.fmt(model.get('id')),
-      data: data,
-      dataType: 'json',
-      type: 'POST',
-      success: function(data) {
-        store.didCreateModel(model, data);
-      }
-    });
-  },
-
-  deleteRecord: function(store, type, model) {
-    jQuery.ajax({
-      url: type.prototype.resourceUrl.fmt(model.get('id')),
-      dataType: 'json',
-      type: 'DELETE',
-      success: function(data) {
-        store.didDeleteModel(model, data);
-      }
-    });
+    commitDetails.deleted.eachType(function(type, array) {
+      this.deleteRecords(store, type, array.slice());
+    }, this);
   }
 });

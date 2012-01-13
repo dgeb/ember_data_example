@@ -9,5 +9,4 @@
 //= require ./vendor/ember
 //= require ./vendor/ember-data
 //= require_tree ./lib
-//= require app
 //= require_tree ./app

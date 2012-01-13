@@ -71,6 +71,195 @@ DS.fixtureAdapter = DS.Adapter.create({
 
 
 (function(exports) {
+var get = Ember.get, set = Ember.set, getPath = Ember.getPath;
+
+DS.RESTAdapter = DS.Adapter.extend({
+  createRecord: function(store, type, model) {
+    var root = this.rootForType(type);
+
+    var data = {};
+    data[root] = get(model, 'data');
+
+    this.ajax("/" + this.pluralize(root), "POST", {
+      data: data,
+      success: function(json) {
+        store.didCreateRecord(model, json[root]);
+      }
+    });
+  },
+
+  createRecords: function(store, type, models) {
+    if (get(this, 'bulkCommit') === false) {
+      return this._super(store, type, models);
+    }
+
+    var root = this.rootForType(type),
+        plural = this.pluralize(root);
+
+    var data = {};
+    data[plural] = models.map(function(model) {
+      return get(model, 'data');
+    });
+
+    this.ajax("/" + this.pluralize(root), "POST", {
+      data: data,
+      success: function(json) {
+        store.didCreateRecords(type, models, json[plural]);
+      }
+    });
+  },
+
+  updateRecord: function(store, type, model) {
+    var id = get(model, 'id');
+    var root = this.rootForType(type);
+
+    var data = {};
+    data[root] = get(model, 'data');
+
+    var url = ["", this.pluralize(root), id].join("/");
+
+    this.ajax(url, "PUT", {
+      data: data,
+      success: function(json) {
+        store.didUpdateRecord(model, json[root]);
+      }
+    });
+  },
+
+  updateRecords: function(store, type, models) {
+    if (get(this, 'bulkCommit') === false) {
+      return this._super(store, type, models);
+    }
+
+    var root = this.rootForType(type),
+        plural = this.pluralize(root);
+
+    var data = {};
+    data[plural] = models.map(function(model) {
+      return get(model, 'data');
+    });
+
+    this.ajax("/" + this.pluralize(root), "POST", {
+      data: data,
+      success: function(json) {
+        store.didUpdateRecords(models, json[plural]);
+      }
+    });
+  },
+
+  deleteRecord: function(store, type, model) {
+    var id = get(model, 'id');
+    var root = this.rootForType(type);
+
+    var url = ["", this.pluralize(root), id].join("/");
+
+    this.ajax(url, "DELETE", {
+      success: function(json) {
+        store.didDeleteRecord(model);
+      }
+    });
+  },
+
+  deleteRecords: function(store, type, models) {
+    if (get(this, 'bulkCommit') === false) {
+      return this._super(store, type, models);
+    }
+
+    var root = this.rootForType(type),
+        plural = this.pluralize(root),
+        primaryKey = getPath(type, 'proto.primaryKey');
+
+    var data = {};
+    data[plural] = models.map(function(model) {
+      return get(model, primaryKey);
+    });
+
+    this.ajax("/" + this.pluralize(root) + "/delete", "POST", {
+      data: data,
+      success: function(json) {
+        store.didDeleteRecords(models);
+      }
+    });
+  },
+
+  find: function(store, type, id) {
+    var root = this.rootForType(type);
+
+    var url = ["", this.pluralize(root), id].join("/");
+
+    this.ajax(url, "GET", {
+      success: function(json) {
+        store.load(type, json[root]);
+      }
+    });
+  },
+
+  findMany: function(store, type, ids) {
+    var root = this.rootForType(type), plural = this.pluralize(root);
+
+    this.ajax("/" + plural, "GET", {
+      data: { ids: ids },
+      success: function(json) {
+        store.loadMany(type, ids, json[plural]);
+      }
+    });
+    var url = "/" + plural;
+  },
+
+  findAll: function(store, type) {
+    var root = this.rootForType(type), plural = this.pluralize(root);
+
+    this.ajax("/" + plural, "GET", {
+      success: function(json) {
+        store.loadMany(type, json[plural]);
+      }
+    });
+  },
+
+  findQuery: function(store, type, query, modelArray) {
+    var root = this.rootForType(type), plural = this.pluralize(root);
+
+    this.ajax("/" + plural, "GET", {
+      data: query,
+      success: function(json) {
+        modelArray.load(json[plural]);
+      }
+    });
+  },
+
+  // HELPERS
+
+  plurals: {},
+
+  // define a plurals hash in your subclass to define
+  // special-case pluralization
+  pluralize: function(name) {
+    return this.plurals[name] || name + "s";
+  },
+
+  rootForType: function(type) {
+    if (type.url) { return type.url; }
+
+    // use the last part of the name as the URL
+    var parts = type.toString().split(".");
+    var name = parts[parts.length - 1];
+    return name.replace(/([A-Z])/g, '_$1').toLowerCase().slice(1);
+  },
+
+  ajax: function(url, type, hash) {
+    hash.url = url;
+    hash.type = type;
+    hash.dataType = "json";
+
+    jQuery.ajax(hash);
+  }
+});
+
+
+})({});
+
+
+(function(exports) {
 var get = SC.get, set = SC.set;
 
 DS.ModelArray = SC.ArrayProxy.extend({
@@ -664,49 +853,6 @@ DS.Store = SC.Object.extend({
     this.updateModelArrays(type, clientId, hash);
   },
 
-  // Internally, the store keeps two data structures representing
-  // the dirty models.
-  //
-  // It holds an OrderedSet of all of the dirty types and a Hash
-  // keyed off of the guid of each type.
-  //
-  // Assuming that Ember.guidFor(Person) is 'sc1', guidFor(Place)
-  // is 'sc2', and guidFor(Thing) is 'sc3', the structure will look
-  // like:
-  //
-  //   store: {
-  //     updatedTypes: [ Person, Place, Thing ],
-  //     updatedModels: {
-  //       sc1: [ person1, person2, person3 ],
-  //       sc2: [ place1 ],
-  //       sc3: [ thing1, thing2 ]
-  //     }
-  //   }
-  //
-  //
-  // Adapters receive an iterator that they can use to retrieve the
-  // type and array at the same time:
-  //
-  //   adapter: {
-  //     commit: function(store, commitDetails) {
-  //       commitDetails.updated.eachType(function(type, array) {
-  //         // this callback will be invoked three times:
-  //         //
-  //         //   1. Person, [ person1, person2, person3 ]
-  //         //   2. Place,  [ place1 ]
-  //         //   3. Thing,  [ thing1, thing2 ]
-  //       }
-  //     }
-  //   }
-  //
-  // This encapsulates the internal structure and presents it to the
-  // adapter as if it was a regular Hash with types as keys and dirty
-  // models as values.
-  //
-  // Note that there is a pair of *Types and *Models for each of
-  // `created`, `updated` and `deleted`. These correspond with the
-  // commitDetails passed into the adapter's commit method.
-
   // ..............
   // . PERSISTING .
   // ..............
@@ -790,6 +936,10 @@ DS.Store = SC.Object.extend({
     idList.push(id);
 
     model.adapterDidUpdate();
+  },
+
+  recordWasInvalid: function(record, errors) {
+    record.wasInvalid(errors);
   },
 
   // ................
@@ -1070,13 +1220,107 @@ DS.State = SC.State.extend({
   isSaving: stateProperty,
   isDeleted: stateProperty,
   isError: stateProperty,
-  isNew: stateProperty
+  isNew: stateProperty,
+  isValid: stateProperty
 });
 
 var cantLoadData = function() {
   // TODO: get the current state name
   throw "You cannot load data into the store when its associated model is in its current state";
 };
+
+var isEmptyObject = function(obj) {
+  for (var prop in obj) {
+    if (!obj.hasOwnProperty(prop)) { continue; }
+    return false;
+  }
+
+  return true;
+};
+
+var setProperty = function(manager, context) {
+  var key = context.key, value = context.value;
+
+  var model = get(manager, 'model'), type = model.constructor;
+  var store = get(model, 'store');
+  var data = get(model, 'data');
+
+  data[key] = value;
+
+  if (store) { store.hashWasUpdated(type, get(model, 'clientId')); }
+};
+
+// several states share extremely common functionality, so we are factoring
+// them out into a common class.
+var DirtyState = DS.State.extend({
+  // these states are virtually identical except that
+  // they (thrice) use their states name explicitly.
+  //
+  // child classes implement stateName.
+  stateName: null,
+  isDirty: true,
+  willLoadData: cantLoadData,
+
+  enter: function(manager) {
+    var stateName = get(this, 'stateName'),
+        model = get(manager, 'model');
+
+    model.withTransaction(function (t) {
+      t.modelBecameDirty(stateName, model);
+    });
+  },
+
+  exit: function(manager) {
+    var stateName = get(this, 'stateName'),
+        model = get(manager, 'model');
+
+    this.notifyModel(model);
+
+    model.withTransaction(function (t) {
+      t.modelBecameClean(stateName, model);
+    });
+  },
+
+  setProperty: setProperty,
+
+  willCommit: function(manager) {
+    manager.goToState('saving');
+  },
+
+  saving: DS.State.extend({
+    isSaving: true,
+
+    didUpdate: function(manager) {
+      manager.goToState('loaded');
+    },
+
+    wasInvalid: function(manager, errors) {
+      var model = get(manager, 'model');
+
+      set(model, 'errors', errors);
+      manager.goToState('invalid');
+    }
+  }),
+
+  invalid: DS.State.extend({
+    isValid: false,
+
+    setProperty: function(manager, context) {
+      setProperty(manager, context);
+
+      var stateName = getPath(this, 'parentState.stateName'),
+          model = get(manager, 'model'),
+          errors = get(model, 'errors'),
+          key = context.key;
+
+      delete errors[key];
+
+      if (isEmptyObject(errors)) {
+        manager.goToState(stateName);
+      }
+    }
+  })
+});
 
 var states = {
   rootState: SC.State.create({
@@ -1086,6 +1330,7 @@ var states = {
     isDeleted: false,
     isError: false,
     isNew: false,
+    isValid: true,
 
     willLoadData: cantLoadData,
 
@@ -1127,16 +1372,7 @@ var states = {
       willLoadData: SC.K,
 
       setProperty: function(manager, context) {
-        var key = context.key, value = context.value;
-
-        var model = get(manager, 'model'), type = model.constructor;
-        var store = get(model, 'store');
-        var data = get(model, 'data');
-
-        data[key] = value;
-
-        if (store) { store.hashWasUpdated(type, get(model, 'clientId')); }
-
+        setProperty(manager, context);
         manager.goToState('updated');
       },
 
@@ -1144,87 +1380,21 @@ var states = {
         manager.goToState('deleted');
       },
 
-      created: DS.State.create({
+      created: DirtyState.create({
+        stateName: 'created',
         isNew: true,
-        isDirty: true,
 
-        enter: function(manager) {
-          var model = get(manager, 'model');
-
-          model.withTransaction(function (t) {
-            t.modelBecameDirty('created', model);
-          });
-        },
-
-        exit: function(manager) {
-          var model = get(manager, 'model');
-
+        notifyModel: function(model) {
           model.didCreate();
-
-          model.withTransaction(function (t) {
-            t.modelBecameClean('created', model);
-          });
-        },
-
-        setProperty: function(manager, context) {
-          var key = context.key, value = context.value;
-
-          var model = get(manager, 'model'), type = model.constructor;
-          var store = get(model, 'store');
-          var data = get(model, 'data');
-
-          data[key] = value;
-
-          if (store) { store.hashWasUpdated(type, get(model, 'clientId')); }
-        },
-
-        willCommit: function(manager) {
-          manager.goToState('saving');
-        },
-
-        saving: DS.State.create({
-          isSaving: true,
-
-          didUpdate: function(manager) {
-            manager.goToState('loaded');
-          }
-        })
+        }
       }),
 
-      updated: DS.State.create({
-        isDirty: true,
+      updated: DirtyState.create({
+        stateName: 'updated',
 
-        willLoadData: cantLoadData,
-
-        enter: function(manager) {
-          var model = get(manager, 'model');
-
-          model.withTransaction(function(t) {
-            t.modelBecameDirty('updated', model);
-          });
-        },
-
-        willCommit: function(manager) {
-          manager.goToState('saving');
-        },
-
-        exit: function(manager) {
-          var model = get(manager, 'model');
-
+        notifyModel: function(model) {
           model.didUpdate();
-
-          model.withTransaction(function(t) {
-            t.modelBecameClean('updated', model);
-          });
-        },
-
-        saving: DS.State.create({
-          isSaving: true,
-
-          didUpdate: function(manager) {
-            manager.goToState('loaded');
-          }
-        })
+        }
       })
     }),
 
@@ -1296,6 +1466,7 @@ DS.Model = SC.Object.extend({
   isDeleted: retrieveFromCurrentState,
   isError: retrieveFromCurrentState,
   isNew: retrieveFromCurrentState,
+  isValid: retrieveFromCurrentState,
 
   clientId: null,
 
@@ -1372,6 +1543,11 @@ DS.Model = SC.Object.extend({
   adapterDidDelete: function() {
     var stateManager = get(this, 'stateManager');
     stateManager.send('didDelete');
+  },
+
+  wasInvalid: function(errors) {
+    var stateManager = get(this, 'stateManager');
+    stateManager.send('wasInvalid', errors);
   },
 
   unknownProperty: function(key) {
