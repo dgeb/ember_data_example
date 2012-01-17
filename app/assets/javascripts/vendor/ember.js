@@ -2467,12 +2467,12 @@ Ember.normalizeTuple.primitive = normalizeTuple;
 Ember.getPath = function(root, path) {
   var hasThis, hasStar, isGlobal;
 
-  if (!path && 'string'===typeof root) {
-    // Helpers that operate with 'this' within an #each
-    if (path === '') {
-      return root;
-    }
+  // Helpers that operate with 'this' within an #each
+  if (path === '') {
+    return root;
+  }
 
+  if (!path && 'string'===typeof root) {
     path = root;
     root = null;
   }
@@ -6373,6 +6373,13 @@ Ember.Enumerable = Ember.Mixin.create( /** @lends Ember.Enumerable */ {
     If your enumerable is empty, this method should return undefined.
 
     @returns {Object} the object or undefined
+
+    @example
+    var arr = ["a", "b", "c"];
+    arr.firstObject(); => "a"
+
+    var arr = [];
+    arr.firstObject(); => undefined
   */
   firstObject: Ember.computed(function() {
     if (get(this, 'length')===0) return undefined ;
@@ -6386,9 +6393,18 @@ Ember.Enumerable = Ember.Mixin.create( /** @lends Ember.Enumerable */ {
   }).property(),
 
   /**
-    Helper method returns the last object from a collection.
+    Helper method returns the last object from a collection. If your enumerable
+    contains only one object, this method should always return that object.
+    If your enumerable is empty, this method should return undefined.
 
-    @returns {Object} the object or undefined
+    @returns {Object} the last object or undefined
+
+    @example
+    var arr = ["a", "b", "c"];
+    arr.lastObject(); => "c"
+
+    var arr = [];
+    arr.lastObject(); => undefined
   */
   lastObject: Ember.computed(function() {
     var len = get(this, 'length');
@@ -6404,7 +6420,6 @@ Ember.Enumerable = Ember.Mixin.create( /** @lends Ember.Enumerable */ {
       pushCtx(context);
       return last;
     }
-
   }).property(),
 
   /**
@@ -7124,7 +7139,7 @@ Ember.Array = Ember.Mixin.create(Ember.Enumerable, /** @scope Ember.Array.protot
     @returns {Number} index or -1 if not found
 
     @example
-    arr = ["a", "b", "c", "d", "a"];
+    var arr = ["a", "b", "c", "d", "a"];
     arr.indexOf("a");      =>  0
     arr.indexOf("z");      => -1
     arr.indexOf("a", 2);   =>  4
@@ -7145,16 +7160,28 @@ Ember.Array = Ember.Mixin.create(Ember.Enumerable, /** @scope Ember.Array.protot
   },
 
   /**
-    Returns the last index for a particular object in the index.
+    Returns the index of the given object's last occurrence.
+    If no startAt argument is given, the search starts from
+    the last position. If it's negative, will count backward
+    from the end of the array. Returns -1 if no match is found.
 
     @param {Object} object the item to search for
-    @param {NUmber} startAt optional starting location to search, default 0
-    @returns {Number} index of -1 if not found
+    @param {Number} startAt optional starting location to search, default 0
+    @returns {Number} index or -1 if not found
+
+    @example
+    var arr = ["a", "b", "c", "d", "a"];
+    arr.lastIndexOf("a");      =>  4
+    arr.lastIndexOf("z");      => -1
+    arr.lastIndexOf("a", 2);   =>  0
+    arr.lastIndexOf("a", -1);  =>  4
+    arr.lastIndexOf("b", 3);   =>  1
+    arr.lastIndexOf("a", 100); =>  4
   */
   lastIndexOf: function(object, startAt) {
     var idx, len = get(this, 'length');
 
-    if (startAt === undefined) startAt = len-1;
+    if (startAt === undefined || startAt >= len) startAt = len-1;
     if (startAt < 0) startAt += len;
 
     for(idx=startAt;idx>=0;idx--) {
@@ -7799,11 +7826,12 @@ Ember.Observable = Ember.Mixin.create(/** @scope Ember.Observable.prototype */ {
     @returns {Ember.Observable}
   */
   setProperties: function(hash) {
-    Ember.beginPropertyChanges(this);
-    for(var prop in hash) {
-      if (hash.hasOwnProperty(prop)) set(this, prop, hash[prop]);
-    }
-    Ember.endPropertyChanges(this);
+    var self = this;
+    Ember.changeProperties(function(){
+      for(var prop in hash) {
+        if (hash.hasOwnProperty(prop)) set(self, prop, hash[prop]);
+      }
+    });
     return this;
   },
 
@@ -13029,14 +13057,40 @@ Ember.State = Ember.Object.extend({
   start: null,
 
   init: function() {
-    Ember.keys(this).forEach(function(name) {
-      var value = this[name];
+    var states = get(this, 'states'), foundStates;
 
-      if (value && value.isState) {
-        set(value, 'parentState', this);
-        set(value, 'name', (get(this, 'name') || '') + '.' + name);
+    // As a convenience, loop over the properties
+    // of this state and look for any that are other
+    // Ember.State instances or classes, and move them
+    // to the `states` hash. This avoids having to
+    // create an explicit separate hash.
+
+    if (!states) {
+      states = {};
+      for (var name in this) {
+        if (name === "constructor") { continue; }
+
+        var value = this[name];
+        if (!value) { continue; }
+
+        if (Ember.State.detect(value)) {
+          value = value.create();
+        }
+
+        if (value.isState) {
+          foundStates = true;
+
+          set(value, 'parentState', this);
+          set(value, 'name', (get(this, 'name') || '') + '.' + name);
+
+          states[name] = value;
+        }
       }
-    }, this);
+
+      if (foundStates) { set(this, 'states', states); }
+    }
+
+    set(this, 'routes', {});
   },
 
   enter: Ember.K,
@@ -13063,20 +13117,6 @@ Ember.StateManager = Ember.State.extend(
   */
   init: function() {
     this._super();
-
-    var states = get(this, 'states');
-    if (!states) {
-      states = {};
-      Ember.keys(this).forEach(function(name) {
-        var value = get(this, name);
-
-        if (value && value.isState) {
-          states[name] = value;
-        }
-      }, this);
-
-      set(this, 'states', states);
-    }
 
     var initialState = get(this, 'initialState');
 
@@ -13132,32 +13172,72 @@ Ember.StateManager = Ember.State.extend(
     }
   },
 
+  findStatesByRoute: function(state, route) {
+    if (!route || route === "") { return undefined; }
+    var r = route.split('.'), ret = [];
+
+    for (var i=0, len = r.length; i < len; i += 1) {
+      var states = get(state, 'states') ;
+
+      if (!states) { return undefined; }
+
+      var s = get(states, r[i]);
+      if (s) { state = s; ret.push(s); }
+      else { return undefined; }
+    }
+
+    return ret;
+  },
+
   goToState: function(name) {
     if (Ember.empty(name)) { return; }
 
     var currentState = get(this, 'currentState') || this, state, newState;
 
-    var exitStates = Ember.A();
+    var exitStates = [], enterStates;
 
-    newState = getPath(currentState, name);
     state = currentState;
 
-    if (!newState) {
+    if (state.routes[name]) {
+      // cache hit
+      exitStates = state.routes[name].exitStates;
+      enterStates = state.routes[name].enterStates;
+      state = state.routes[name].futureState;
+    } else {
+      // cache miss
+
+      newState = this.findStatesByRoute(currentState, name);
+
       while (state && !newState) {
-        exitStates[Ember.guidFor(state)] = state;
-        exitStates.push(state);
+        exitStates.unshift(state);
 
         state = get(state, 'parentState');
         if (!state) {
-          state = get(this, 'states');
-          newState = getPath(state, name);
+          newState = this.findStatesByRoute(this, name);
           if (!newState) { return; }
         }
-        newState = getPath(state, name);
+        newState = this.findStatesByRoute(state, name);
       }
+
+      enterStates = newState.slice(0), exitStates = exitStates.slice(0);
+
+      if (enterStates.length > 0) {
+        state = enterStates[enterStates.length - 1];
+
+        while (enterStates.length > 0 && enterStates[0] === exitStates[0]) {
+          enterStates.shift();
+          exitStates.shift();
+        }
+      }
+
+      currentState.routes[name] = {
+        exitStates: exitStates,
+        enterStates: enterStates,
+        futureState: state
+      };
     }
 
-    this.enterState(state, name, exitStates);
+    this.enterState(exitStates, enterStates, state);
   },
 
   getState: function(name) {
@@ -13194,23 +13274,8 @@ Ember.StateManager = Ember.State.extend(
     if (!async) { transition.resume(); }
   },
 
-  enterState: function(parent, name, exitStates) {
+  enterState: function(exitStates, enterStates, state) {
     var log = Ember.LOG_STATE_TRANSITIONS;
-
-    var parts = name.split("."), state = parent, enterStates = Ember.A();
-
-    parts.forEach(function(name) {
-      state = state[name];
-
-      var guid = Ember.guidFor(state);
-
-      if (guid in exitStates) {
-        exitStates.removeObject(state);
-        delete exitStates[guid];
-      } else {
-        enterStates.push(state);
-      }
-    });
 
     var stateManager = this;
 
@@ -13954,14 +14019,7 @@ Ember.TextField = Ember.View.extend(Ember.TextSupport,
 
   tagName: "input",
   attributeBindings: ['type', 'value'],
-  type: "text",
-
-  /**
-    @private
-  */
-  _updateElementValue: function() {
-    this.$().val(get(this, 'value'));
-  }
+  type: "text"
 
 });
 
@@ -14117,6 +14175,30 @@ Ember.TabView = Ember.View.extend({
 
 
 (function(exports) {
+})({});
+
+
+(function(exports) {
+// ==========================================================================
+// Project:   Ember Handlebar Views
+// Copyright: ©2011 Strobe Inc. and contributors.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
+Ember.Form = Ember.View.extend(Ember.TargetActionSupport, {
+  classNames:      ['ember-form'],
+  tagName:         'form',
+  target:          '*',            // default target = view itself
+  action:          'submitForm',   // default action = submitForm()
+  propagateEvents: false,
+
+  // trigger the action bound to this view when the form is submitted
+  submit: function(evt) {
+    evt.preventDefault();
+    this.triggerAction();
+    return Ember.get(this, 'propagateEvents');
+  }
+});
+
 })({});
 
 
