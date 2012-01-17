@@ -17,20 +17,3 @@ DS.Store.reopen({
     this.loadMany(type, ids, array);
   }
 });
-
-// Add commit() method to adapter, as suggested in ember-data readme
-DS.RESTAdapter.reopenClass({
-  commit: function(store, commitDetails) {
-    commitDetails.updated.eachType(function(type, array) {
-      this.updateRecords(store, type, array.slice());
-    }, this);
-
-    commitDetails.created.eachType(function(type, array) {
-      this.createRecords(store, type, array.slice());
-    }, this);
-
-    commitDetails.deleted.eachType(function(type, array) {
-      this.deleteRecords(store, type, array.slice());
-    }, this);
-  }
-});

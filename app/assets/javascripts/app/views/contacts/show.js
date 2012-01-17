@@ -20,7 +20,6 @@ App.ShowContactView = Em.View.extend({
     var contact = this.get("contact");
     contact.deleteRecord();
 
-    // TODO: not sure how to deal with commit errors
-    App.store.commit();
+    App.store.commit(); // TODO: error handling
   }
 });

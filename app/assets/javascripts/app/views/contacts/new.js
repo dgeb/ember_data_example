@@ -28,8 +28,7 @@ App.NewContactView = Ember.Form.extend({
                              {first_name: contact.get('first_name'),
                               last_name:  contact.get('last_name')});
 
-      // TODO: not sure how to deal with commit errors
-      App.store.commit();
+      App.store.commit(); // TODO: error handling
 
       this.get("parentView").hideNew();
     }

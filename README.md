@@ -1,7 +1,5 @@
 # Ember Data Example
 
-IMPORTANT: THIS EXAMPLE IS NOT YET FULLY WORKING.
-
 This is a simple Rails 3.1 app created to try out Ember.js and the Data library recently created by the Ember.js team:
 https://github.com/emberjs/data
 
@@ -18,8 +16,7 @@ Assuming Ruby 1.9.2+ with bundler gem installed:
 
 ## Notes
 
-A custom adapter (`DS.restAdapter`) was written for communicating with a REST data source. This adapter is very alpha.
-It does not include error handling, as it's unclear how this should be integrated into Ember Data adapters in general.
+This example uses the default adapter included with Ember Data, which doesn't include error handling.
 
 The contact listing is initially loaded from data embedded in the html to improve performance (see `app/views/contacts/index.html.erb`).
 
@@ -27,4 +24,4 @@ Please help improve this example by filing issues and pull requests!
 
 ## License
 
-Copyright 2011 Dan Gebhardt. MIT License (see LICENSE for details).
+Copyright 2012 Dan Gebhardt. MIT License (see LICENSE for details).

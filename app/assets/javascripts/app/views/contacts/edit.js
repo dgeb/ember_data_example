@@ -21,8 +21,7 @@ App.EditContactView = Em.Form.extend({
     if (validationErrors !== undefined) {
       App.displayError(validationErrors);
     } else {
-      // TODO: not sure how to deal with commit errors
-      App.store.commit();
+      App.store.commit(); // TODO: error handling
 
       // hide form
       this.get("parentView").hideEdit();
