@@ -2,9 +2,9 @@ App.EditContactView = Ember.View.extend({
   tagName: 'form',
   templateName: 'app/templates/contacts/edit',
 
-  afterRender: function() {
-    // TODO: Is this the right place to set focus? Without setTimeout, Chrome gets locked up
-    setTimeout(function() {this.$('input:first').focus();});
+  didInsertElement: function() {
+    this._super();
+    this.$('input:first').focus();
   },
 
   cancelForm: function() {
