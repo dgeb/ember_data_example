@@ -1,4 +1,5 @@
-App.NewContactView = Ember.Form.extend({
+App.NewContactView = Ember.View.extend({
+  tagName: 'form',
   templateName: 'app/templates/contacts/edit',
 
   init: function() {
@@ -16,14 +17,16 @@ App.NewContactView = Ember.Form.extend({
     this.get("parentView").hideNew();
   },
 
-  submitForm: function() {
+  submit: function(event) {
     var contact = this.get("contact");
     var validationErrors = contact.validate();
+
+    event.preventDefault();
 
     if (validationErrors !== undefined) {
       App.displayError(validationErrors);
     } else {
-      // TODO: ugh
+      // TODO: ugh - need better serialization
       App.store.createRecord(App.Contact,
                              {first_name: contact.get('first_name'),
                               last_name:  contact.get('last_name')});
