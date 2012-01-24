@@ -1,12 +1,10 @@
 {{#with contact}}
-  {{view Ember.TextField valueBinding="first_name"}}
-  {{view Ember.TextField valueBinding="last_name"}}
-  <button type="submit">
-    {{#if id}}
-      Update
-    {{else}}
-      Create
-    {{/if}}
-  </button>
+  {{view Ember.TextField valueBinding="first_name" placeholder="First name"}}
+  {{view Ember.TextField valueBinding="last_name"  placeholder="Last name"}}
+  {{#if id}}
+    {{submitButton "Update"}}
+  {{else}}
+    {{submitButton "Create"}}
+  {{/if}}
 {{/with}}
-{{#view Ember.Link action="cancelForm"}}Cancel{{/view}}
+<a href="#" {{action "cancelForm"}}>Cancel</a>

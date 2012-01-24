@@ -3,7 +3,6 @@
     <tr>
       <th>ID</th>
       <th>Name</th>
-      <th />
     </tr>
   </thead>
   <tbody>
@@ -12,8 +11,8 @@
   {{/each}}
   {{#if isNewVisible}}
     <tr>
-      <td></td>
-      <td colspan="2">
+      <td>*</td>
+      <td>
         {{view App.NewContactView}}
       </td>
     </tr>
@@ -21,6 +20,6 @@
   </tbody>
 </table>
 <div class="commands">
-  {{#view Ember.Link action="showNew"}}New Contact{{/view}}
-  {{#view Ember.Link action="refreshListing"}}Refresh Listing{{/view}}
+  <a href="#" {{action "showNew"}}>New Contact</a>
+  <a href="#" {{action "refreshListing"}}>Refresh Listing</a>
 </div>
