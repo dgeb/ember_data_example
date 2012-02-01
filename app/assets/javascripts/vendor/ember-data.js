@@ -64,7 +64,17 @@ DS.fixtureAdapter = DS.Adapter.create({
 
   findMany: function() {
     this.find.apply(this, arguments);
+  },
+
+  findAll: function(store, type) {
+    var fixtures = type.FIXTURES;
+
+    ember_assert("Unable to find fixtures for model type "+type.toString(), !!fixtures);
+
+    var ids = fixtures.map(function(item, index, self){ return item.id });
+    store.loadMany(type, ids, fixtures);
   }
+
 });
 
 })({});
@@ -110,7 +120,8 @@ DS.RESTAdapter = DS.Adapter.extend({
   },
 
   updateRecord: function(store, type, model) {
-    var id = get(model, 'id');
+    var primaryKey = getPath(type, 'proto.primaryKey'),
+        id = get(model, primaryKey);
     var root = this.rootForType(type);
 
     var data = {};
@@ -148,7 +159,8 @@ DS.RESTAdapter = DS.Adapter.extend({
   },
 
   deleteRecord: function(store, type, model) {
-    var id = get(model, 'id');
+    var primaryKey = getPath(type, 'proto.primaryKey'),
+        id = get(model, primaryKey);
     var root = this.rootForType(type);
 
     var url = ["", this.pluralize(root), id].join("/");
@@ -657,7 +669,7 @@ DS.Store = Ember.Object.extend({
   _adapter: Ember.computed(function() {
     var adapter = get(this, 'adapter');
     if (typeof adapter === 'string') {
-      return getPath(this, adapter);
+      return getPath(this, adapter, false) || getPath(window, adapter);
     }
     return adapter;
   }).property('adapter').cacheable(),
@@ -1573,6 +1585,16 @@ DS.Model = Ember.Object.extend({
   }
 });
 
+DS.Model.reopenClass({
+  typeForAssociation: function(association) {
+    var type = this.metaForProperty(association).type;
+    if (typeof type === 'string') {
+      type = getPath(this, type, false) || getPath(window, type);
+    }
+    return type;
+  }
+});
+
 DS.attr = function(type, options) {
   var transform = DS.attr.transforms[type];
   var transformFrom = transform.from;
@@ -1618,7 +1640,9 @@ var hasAssociation = function(type, options, one) {
     var data = get(this, 'data'), ids, id, association,
       store = get(this, 'store');
 
-    if (typeof type === 'string') { type = getPath(this, type); }
+    if (typeof type === 'string') {
+      type = getPath(this, type, false) || getPath(window, type);
+    }
 
     key = (options && options.key) ? options.key : key;
     if (one) {
@@ -1630,7 +1654,7 @@ var hasAssociation = function(type, options, one) {
     }
 
     return association;
-  }).property('data').cacheable();
+  }).property('data').cacheable().meta({ type: type });
 };
 
 DS.hasMany = function(type, options) {
