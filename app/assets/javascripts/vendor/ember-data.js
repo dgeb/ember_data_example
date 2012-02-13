@@ -284,6 +284,15 @@ DS.ModelArray = Ember.ArrayProxy.extend({
     this._super();
   },
 
+  replace: function(index, removed, added) {
+    added = added.map(function(item) {
+      ember_assert("You can only add items of " + (get(this, 'type') && get(this, 'type').toString()) + " to this association.", !get(this, 'type') || (get(this, 'type') === item.constructor));
+      return item.get('clientId');
+    });
+
+    this._super(index, removed, added);
+  },
+
   arrayDidChange: function(array, index, removed, added) {
     var modelCache = get(this, 'modelCache');
     modelCache.replace(index, 0, Array(added));
@@ -789,7 +798,7 @@ DS.Store = Ember.Object.extend({
       // let the adapter set the data, possibly async
       var adapter = get(this, '_adapter');
       if (adapter && adapter.find) { adapter.find(this, type, id); }
-      else { throw fmt("Adapter is either null or do not implement `find` method", this); }
+      else { throw fmt("Adapter is either null or does not implement `find` method", this); }
     }
 
     return model;
@@ -822,7 +831,7 @@ DS.Store = Ember.Object.extend({
     if ((needed && get(needed, 'length') > 0) || query) {
       var adapter = get(this, '_adapter');
       if (adapter && adapter.findMany) { adapter.findMany(this, type, needed, query); }
-      else { throw fmt("Adapter is either null or do not implement `findMany` method", this); }
+      else { throw fmt("Adapter is either null or does not implement `findMany` method", this); }
     }
 
     return this.createModelArray(type, clientIds);
@@ -832,7 +841,7 @@ DS.Store = Ember.Object.extend({
     var array = DS.AdapterPopulatedModelArray.create({ type: type, content: Ember.A([]), store: this });
     var adapter = get(this, '_adapter');
     if (adapter && adapter.findQuery) { adapter.findQuery(this, type, query, array); }
-    else { throw fmt("Adapter is either null or do not implement `findQuery` method", this); }
+    else { throw fmt("Adapter is either null or does not implement `findQuery` method", this); }
     return array;
   },
 
