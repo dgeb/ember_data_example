@@ -6,7 +6,7 @@ class ContactsController < ApplicationController
 
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: @contacts }
+      format.json { render json: {contacts: @contacts} }
     end
   end
 
@@ -15,7 +15,7 @@ class ContactsController < ApplicationController
     @contact = Contact.find(params[:id])
 
     respond_to do |format|
-      format.json { render json: @contact }
+      format.json { render json: {contact: @contact} }
     end
   end
 
@@ -25,7 +25,7 @@ class ContactsController < ApplicationController
 
     respond_to do |format|
       if @contact.save
-        format.json { render json: @contact, status: :created, location: @contact }
+        format.json { render json: {contact: @contact}, status: :created, location: @contact }
       else
         format.json { render json: @contact.errors, status: :unprocessable_entity }
       end
@@ -38,7 +38,7 @@ class ContactsController < ApplicationController
 
     respond_to do |format|
       if @contact.update_attributes(params[:contact])
-        format.json { head :ok }
+        format.json { render json: {contact: @contact}, status: :ok }
       else
         format.json { render json: @contact.errors, status: :unprocessable_entity }
       end
@@ -51,7 +51,7 @@ class ContactsController < ApplicationController
     @contact.destroy
 
     respond_to do |format|
-      format.json { head :ok }
+      format.json { render json: nil, status: :ok }
     end
   end
 end
