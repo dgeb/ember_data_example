@@ -1,7 +1,8 @@
 App = Em.Application.create();
 
 App.store = DS.Store.create({
-  adapter: DS.RESTAdapter.create({bulkCommit: false})
+  adapter:  DS.RESTAdapter.create({bulkCommit: false}),
+  revision: 2
 });
 
 App.displayError = function(e) {
