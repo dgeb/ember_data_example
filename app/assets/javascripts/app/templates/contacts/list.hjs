@@ -7,7 +7,9 @@
   </thead>
   <tbody>
   {{#each contacts}}
-    {{view App.ShowContactView contactBinding="this"}}
+    {{#if this.id}}
+      {{view App.ShowContactView contactBinding="this"}}
+    {{/if}}
   {{/each}}
   {{#if isNewVisible}}
     <tr>

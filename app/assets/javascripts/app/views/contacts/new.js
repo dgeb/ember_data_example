@@ -3,9 +3,10 @@ App.NewContactView = Ember.View.extend({
   templateName: 'app/templates/contacts/edit',
 
   init: function() {
-    // TODO: ugh
-    this.set("contact", App.Contact.create({first_name: '', last_name: ''}));
     this._super();
+
+    this.transaction = App.store.transaction();
+    this.set("contact", this.transaction.createRecord(App.Contact, {}));
   },
 
   didInsertElement: function() {
@@ -14,6 +15,7 @@ App.NewContactView = Ember.View.extend({
   },
 
   cancelForm: function() {
+    this.transaction.rollback();
     this.get("parentView").hideNew();
   },
 
@@ -26,12 +28,7 @@ App.NewContactView = Ember.View.extend({
     if (validationErrors !== undefined) {
       App.displayError(validationErrors);
     } else {
-      // TODO: ugh - need better serialization
-      App.store.createRecord(App.Contact,
-                             {first_name: contact.get('first_name'),
-                              last_name:  contact.get('last_name')});
-
-      App.store.commit(); // TODO: error handling
+      this.transaction.commit(); // TODO: error handling
 
       this.get("parentView").hideNew();
     }

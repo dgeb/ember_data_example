@@ -1,6 +1,7 @@
 App.contactsController = Em.ArrayController.create({
   loadAll: function(data) {
-    this.set('content', App.store.loadAll(App.Contact, data));
+    App.store.loadMany(App.Contact, data);
+    this.findAll();
   },
 
   findAll: function() {

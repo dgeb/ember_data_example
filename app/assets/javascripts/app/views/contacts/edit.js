@@ -3,15 +3,15 @@ App.EditContactView = Ember.View.extend({
   templateName: 'app/templates/contacts/edit',
 
   didInsertElement: function() {
+    this.transaction = App.store.transaction();
+    this.transaction.add(this.get("contact"));
+
     this._super();
     this.$('input:first').focus();
   },
 
   cancelForm: function() {
-    // TODO: This will not cancel edits to the contact, which we're editing directly.
-    // Two possible approaches to fix this:
-    // * edit a copy of the contact and apply changes in submitForm()
-    // * save the original version of the object and then revert to it on cancel
+    this.transaction.rollback();
     this.get("parentView").hideEdit();
   },
 
@@ -24,7 +24,7 @@ App.EditContactView = Ember.View.extend({
     if (validationErrors !== undefined) {
       App.displayError(validationErrors);
     } else {
-      App.store.commit(); // TODO: error handling
+      this.transaction.commit(); // TODO: error handling
 
       // hide form
       this.get("parentView").hideEdit();
