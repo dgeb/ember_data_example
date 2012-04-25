@@ -1,6 +1,9 @@
 App.contactsController = Em.ArrayController.create({
   loadAll: function(data) {
-    App.store.loadMany(App.Contact, data);
+    // TODO - figure out the proper way to load data into the store and then retrieve it as an Ember array
+    // App.store.loadMany(App.Contact, data);
+
+    // for now, let's just hit the server
     this.findAll();
   },
 
