@@ -28,6 +28,6 @@ group :test do
   gem 'turn', '~> 0.8.3', :require => false
 end
 
-group :development do
-  gem 'ruby-debug19', :require => 'ruby-debug'
-end
+#group :development do
+#  gem 'ruby-debug19', :require => 'ruby-debug'
+#end
