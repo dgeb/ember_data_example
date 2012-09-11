@@ -6,12 +6,12 @@
     </tr>
   </thead>
   <tbody>
-  {{#each contacts}}
-    {{#if this.id}}
-      {{view App.ShowContactView contactBinding="this"}}
+  {{#each contact in content}}
+    {{#if contact.id}}
+      {{view App.ShowContactView contactBinding="contact"}}
     {{/if}}
   {{/each}}
-  {{#if isNewVisible}}
+  {{#if view.isNewVisible}}
     <tr>
       <td>*</td>
       <td>
@@ -22,6 +22,5 @@
   </tbody>
 </table>
 <div class="commands">
-  <a href="#" {{action "showNew"}}>New Contact</a>
-  <a href="#" {{action "refreshListing"}}>Refresh Listing</a>
+  <a href="#" {{action "showNew" target="view"}}>New Contact</a>
 </div>

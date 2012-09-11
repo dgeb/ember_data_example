@@ -4,9 +4,12 @@
 // It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
 // the compiled file.
 //
-//= require jquery
+//= require vendor/jquery-1.7.2.min
+//= require vendor/handlebars
+//= require vendor/ember
+//= require vendor/ember-data
 //= require jquery_ujs
-//= require ./vendor/ember
-//= require ./vendor/ember-data
 //= require_tree ./lib
 //= require_tree ./app
+
+App.initialize();

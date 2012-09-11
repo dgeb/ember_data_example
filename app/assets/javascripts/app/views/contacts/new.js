@@ -6,7 +6,7 @@ App.NewContactView = Ember.View.extend({
     this._super();
 
     this.transaction = App.store.transaction();
-    this.set("contact", this.transaction.createRecord(App.Contact, {}));
+    this.get("controller").set("contact", this.transaction.createRecord(App.Contact, {}));
   },
 
   didInsertElement: function() {
@@ -20,7 +20,7 @@ App.NewContactView = Ember.View.extend({
   },
 
   submit: function(event) {
-    var contact = this.get("contact");
+    var contact = this.get("controller").get("contact");
     var validationErrors = contact.validate();
 
     event.preventDefault();
