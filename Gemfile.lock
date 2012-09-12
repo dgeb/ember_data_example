@@ -35,6 +35,9 @@ GEM
     activesupport (3.2.8)
       i18n (~> 0.6)
       multi_json (~> 1.0)
+    anjlab-bootstrap-rails (2.1.1.1)
+      railties (>= 3.0)
+      sass (>= 3.2)
     ansi (1.4.3)
     arel (3.0.2)
     builder (3.0.3)
@@ -111,6 +114,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_model_serializers!
+  anjlab-bootstrap-rails (>= 2.1)
   ember-rails (>= 0.4.0)
   jquery-rails
   rails (= 3.2.8)

@@ -8,6 +8,7 @@ gem 'sqlite3'
 group :assets do
   gem 'sass-rails'
   gem 'uglifier'
+  gem 'anjlab-bootstrap-rails', '>= 2.1', :require => 'bootstrap-rails'
 end
 
 gem 'active_model_serializers', github: 'josevalim/active_model_serializers'
