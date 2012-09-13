@@ -13,8 +13,12 @@ App.Contact  = DS.Model.extend({
     var firstName = this.get('firstName'),
         lastName = this.get('lastName');
 
-    if (firstName === undefined && lastName === undefined && this.get('id') === undefined) {
-      return 'New Contact';
+    if (!firstName && !lastName) {
+      if (this.get('id') === undefined) {
+        return '(New Contact)';
+      } else {
+        return '(No Name)';
+      }
     }
 
     if (firstName === undefined) firstName = '';
