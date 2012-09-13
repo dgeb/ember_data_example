@@ -1,10 +1,15 @@
 <div class="navbar navbar-inverse navbar-fixed-top">
   <div class="navbar-inner">
-    <div class="container">
+    <div class="container-fluid">
       <div class="brand">Ember Contacts</div>
+      <div class="btn-group pull-right">
+        <a class="btn" {{action showNewContact}}><i class="icon-plus-sign"></i> Add Contact</a>
+      </div>
     </div>
   </div>
 </div>
-<div class="container" id="main">
-{{outlet}}
+<div class="container-fluid" id="main">
+  <div class="row-fluid">
+    {{outlet}}
+  </div>
 </div>

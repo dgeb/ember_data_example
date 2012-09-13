@@ -10,11 +10,20 @@ App.Contact  = DS.Model.extend({
   },
 
   fullName: Em.computed(function() {
-    return this.get('firstName') + ' ' + this.get('lastName');
-  }).property('firstName', 'lastName')
-});
+    var firstName = this.get('firstName'),
+        lastName = this.get('lastName');
 
-App.Contact.reopenClass({
+    if (firstName === undefined && lastName === undefined && this.get('id') === undefined) {
+      return 'New Contact';
+    }
+
+    if (firstName === undefined) firstName = '';
+    if (lastName === undefined) lastName = '';
+
+    return firstName + ' ' + lastName;
+  }).property('firstName', 'lastName')
+
+}).reopenClass({
   collectionUrl: '/contacts',
   resourceUrl: '/contacts/%@',
   resourceName: 'contact'
