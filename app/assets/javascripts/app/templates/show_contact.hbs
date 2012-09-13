@@ -1,4 +1,17 @@
-<h2>{{content.fullName}}</h2>
+{{#with content}}
+  <h2><img {{bindAttr src="gravatar"}} />  {{fullName}}</h2>
+
+  <dl class="dl-horizontal">
+    {{#if email}}
+      <dt>Email:</dt>
+      <dd>{{mailto email}}</dd>
+    {{/if}}
+    {{#if notes}}
+      <dt>Notes:</dt>
+      <dd>{{notes}}</dd>
+    {{/if}}
+  </dl>
+{{/with}}
 
 <div class="well well-small">
   <a class="btn" {{action showEdit}}>Edit</a>

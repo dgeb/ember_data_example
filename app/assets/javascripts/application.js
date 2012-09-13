@@ -8,6 +8,7 @@
 //= require vendor/handlebars
 //= require vendor/ember
 //= require vendor/ember-data
+//= require vendor/md5
 //= require jquery_ujs
 //= require_tree ./lib
 //= require_tree ./app

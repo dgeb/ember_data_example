@@ -1,8 +1,10 @@
 App.Contact  = DS.Model.extend({
   firstName: DS.attr('string'),
   lastName:  DS.attr('string'),
+  email:     DS.attr('string'),
+  notes:     DS.attr('string'),
 
-  fullName: Em.computed(function() {
+  fullName: function() {
     var firstName = this.get('firstName'),
         lastName = this.get('lastName');
 
@@ -18,7 +20,13 @@ App.Contact  = DS.Model.extend({
     if (lastName === undefined) lastName = '';
 
     return firstName + ' ' + lastName;
-  }).property('firstName', 'lastName')
+  }.property('firstName', 'lastName'),
+
+  gravatar: function() {
+    var email = this.get('email');
+    if (!email) email = '';
+    return 'http://www.gravatar.com/avatar/' + MD5(email);
+  }.property('email')
 
 }).reopenClass({
   collectionUrl: '/contacts',
