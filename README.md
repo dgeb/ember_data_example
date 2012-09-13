@@ -1,10 +1,12 @@
 # Ember Data Example
 
-This is a simple Rails 3.1 app created to try out Ember.js and the Data library recently created by the Ember.js team:
-https://github.com/emberjs/data
+This is a simple Rails 3.2 app created to demo [Ember.js](https://github.com/emberjs/ember.js),
+[Ember-Data](https://github.com/emberjs/data) and
+[Active Model Serializers](https://github.com/josevalim/active_model_serializers).
+It uses the edge versions of Ember (post 1.0.pre) and Ember Data (the relationship-improvements branch),
+and therefore may be unstable.
 
-The app itself is a single-page Ember.js take on Rails CRUD scaffolding. It is one of several similar examples I'm creating
-to try out Ember.js and different persistence strategies.
+The app itself is a simple, single-page contact manager styled with Twitter Bootstrap.
 
 ## Installation
 
@@ -14,11 +16,7 @@ Assuming Ruby 1.9.2+ with bundler gem installed:
     $ bundle exec rake db:migrate
     $ rails s
 
-## Notes
-
-This example uses the default adapter included with Ember Data, which doesn't include error handling.
-
-The contact listing is initially loaded from data embedded in the html to improve performance (see `app/views/contacts/index.html.erb`).
+## Contributions Welcome :)
 
 Please help improve this example by filing issues and pull requests!
 
