@@ -1,6 +1,7 @@
 App.EditContactView = Ember.View.extend({
-  tagName: 'form',
   templateName: 'app/templates/edit_contact',
+  tagName: 'form',
+  classNames: 'form-horizontal',
 
   didInsertElement: function() {
     this._super();

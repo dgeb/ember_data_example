@@ -1,6 +1,18 @@
+<legend>{{#if content.id}}Edit{{else}}Create{{/if}} Contact</legend>
+
 {{#with content}}
-  {{view Ember.TextField valueBinding="firstName" placeholder="First name"}}
-  {{view Ember.TextField valueBinding="lastName"  placeholder="Last name"}}
+  <div class="control-group">
+    <label class="control-label" for="firstName">First name</label>
+    <div class="controls">
+      {{view Ember.TextField valueBinding="firstName" id="firstName" placeholder="First name"}}
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="lastName">Last name</label>
+    <div class="controls">
+      {{view Ember.TextField valueBinding="lastName" id="lastName" placeholder="Last name"}}
+    </div>
+  </div>
 {{/with}}
 <div class="form-actions">
   {{#if content.id}}
