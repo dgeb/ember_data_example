@@ -18,7 +18,7 @@ App.EditContactController = Em.Controller.extend({
   },
 
   updateRecord: function() {
-    // commit and then clear the transaction (so cancelEditing doesn't attempt a rollback)
+    // commit and then clear the transaction (so exitEditing doesn't attempt a rollback)
     this.transaction.commit();
     this.transaction = null;
 
