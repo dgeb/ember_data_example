@@ -4,11 +4,15 @@
   margin-top: 60px;
 }
 
-.contact-details dl.dl-horizontal {
-  dt {
-    width: 130px;
-  }
-  dd {
-    margin-left: 145px;
+.contact-details {
+  h2 img { margin-right: 15px; }
+
+  dl.dl-horizontal {
+    dt {
+      width: 80px;
+    }
+    dd {
+      margin-left: 95px;
+    }
   }
 }
