@@ -8,6 +8,8 @@ and therefore may be unstable.
 
 The app itself is a simple, single-page contact manager styled with Twitter Bootstrap.
 
+![Screen shot](https://raw.github.com/dgeb/ember_data_example/master/doc/ss.png)
+
 ## Installation
 
 Assuming Ruby 1.9.2+ with bundler gem installed:
