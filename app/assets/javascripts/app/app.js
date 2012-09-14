@@ -2,19 +2,5 @@ App = Em.Application.create({
   store: DS.Store.create({
     adapter:  DS.RESTAdapter.create(),
     revision: 5
-  }),
-
-  displayError: function(e) {
-    if (typeof e === 'string') {
-      // display error strings
-      alert(e);
-    }
-    else if (typeof e === 'object' && e.responseText !== undefined) {
-      // TODO - further process json errors
-      alert(e.responseText);
-    }
-    else {
-      alert("An unexpected error occurred.");
-    }
-  }
+  })
 });
