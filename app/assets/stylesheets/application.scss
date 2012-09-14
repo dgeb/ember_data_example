@@ -5,7 +5,11 @@
 }
 
 .contact-details {
-  h2 img { margin-right: 15px; }
+  h2 img {
+    margin-right: 15px;
+    width: 80px;
+    height: 80px;
+  }
 
   dl.dl-horizontal {
     dt {
