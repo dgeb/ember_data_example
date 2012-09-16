@@ -24,7 +24,17 @@ App.EditContactController = Em.Controller.extend({
     this.transaction.commit();
     this.transaction = null;
 
-    // transition to the updated contact
+    if (this.get('content.isNew')) {
+      // when creating new records, it's necessary to wait for the record to be assigned
+      // an id before we can transition to its route (which depends on its id)
+      this.get('content').addObserver('id', this, 'showRecord');
+    } else {
+      // when updating records, the id is already known, so we can transition immediately
+      this.showRecord();
+    }
+  },
+
+  showRecord: function() {
     App.router.transitionTo('contacts.contact.index', this.get('content'));
   }
 });
