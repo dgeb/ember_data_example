@@ -43,18 +43,10 @@ App.Router = Ember.Router.extend({
       }),
 
       contact: Em.Route.extend({
-        route: '/contacts/:id',
+        route: '/contacts/:contact_id',
 
         connectOutlets: function(router, context) {
           router.get('contactsController').connectOutlet('contact', context);
-        },
-
-        serialize: function(router, context){
-          return {id: context.get('id')};
-        },
-
-        deserialize: function(router, params){
-          return App.store.find(App.Contact, params.id);
         },
 
         index: Em.Route.extend({
