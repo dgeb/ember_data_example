@@ -1,7 +1,6 @@
 App.Router = Ember.Router.extend({
   location: 'hash',
-  enableLogging: true,
-
+  
   root: Em.Route.extend({
     contacts: Em.Route.extend({
       route: '/',
