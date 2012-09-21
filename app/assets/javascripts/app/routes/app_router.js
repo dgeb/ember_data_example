@@ -1,10 +1,11 @@
 App.Router = Ember.Router.extend({
   location: 'hash',
+  enableLogging: true,
 
   root: Em.Route.extend({
     contacts: Em.Route.extend({
       route: '/',
-
+      
       showContact: function(router, event) {
         router.transitionTo('contacts.contact.index', event.context);
       },
@@ -13,15 +14,11 @@ App.Router = Ember.Router.extend({
         router.transitionTo('contacts.newContact', {});
       },
 
-      connectOutlets: function(router) {
-        router.get('applicationController').connectOutlet('contacts');
-      },
-
       index: Em.Route.extend({
         route: '/',
 
         connectOutlets: function(router) {
-          router.get('applicationController').connectOutlet('contacts');
+          router.get('applicationController').connectOutlet('contacts', router.get('store').findAll(App.Contact));
         }
       }),
 
