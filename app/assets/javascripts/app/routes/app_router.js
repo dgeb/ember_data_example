@@ -13,12 +13,12 @@ App.Router = Ember.Router.extend({
         router.transitionTo('contacts.newContact', {});
       },
 
-      index: Em.Route.extend({
-        route: '/',
+      connectOutlets: function(router) {
+        router.get('applicationController').connectOutlet('contacts', router.get('store').findAll(App.Contact));
+      },
 
-        connectOutlets: function(router) {
-          router.get('applicationController').connectOutlet('contacts', router.get('store').findAll(App.Contact));
-        }
+      index: Em.Route.extend({
+        route: '/'
       }),
 
       newContact: Em.Route.extend({
