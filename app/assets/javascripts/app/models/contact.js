@@ -28,13 +28,4 @@ App.Contact  = DS.Model.extend({
     return 'http://www.gravatar.com/avatar/' + MD5(email);
   }.property('email')
 
-}).reopenClass({
-  collectionUrl: '/contacts',
-  resourceUrl: '/contacts/%@',
-  resourceName: 'contact'
-});
-
-DS.RESTAdapter.map('App.Contact', {
-  firstName: { key: 'first_name' },
-  lastName:  { key: 'last_name' }
 });
