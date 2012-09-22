@@ -4,6 +4,7 @@ App.Router = Ember.Router.extend({
   root: Em.Route.extend({
     contacts: Em.Route.extend({
       route: '/',
+      initialState: 'index',
       
       showContact: function(router, event) {
         router.transitionTo('contacts.contact.index', event.context);
