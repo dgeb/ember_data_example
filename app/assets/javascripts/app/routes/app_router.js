@@ -18,7 +18,11 @@ App.Router = Ember.Router.extend({
       },
 
       index: Em.Route.extend({
-        route: '/'
+        route: '/',
+
+        connectOutlets: function(router) {
+          router.get('applicationController').connectOutlet('contacts');
+        }
       }),
 
       newContact: Em.Route.extend({
