@@ -2,7 +2,7 @@ App.EditContactController = Em.Controller.extend({
   content: null,
 
   enterEditing: function() {
-    this.transaction = App.store.transaction();
+    this.transaction = this.get('store').transaction();
     if (this.get('content.id')) {
       this.transaction.add(this.get('content'));
     } else {
