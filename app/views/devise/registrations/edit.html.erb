@@ -1,0 +1,48 @@
+<div class="row equal-heights" style="text-align: center;">
+  <div class="span4 offset4">
+		<br/>
+		<br/>
+   	<%= form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put }) do |f| %>
+		  <%= devise_error_messages! %>
+      <fieldset>
+        <legend>Edit <%= resource_name.to_s.humanize %></legend>
+        <br/>
+        <div class="control-group">
+          <div class="controls">
+            <%= f.email_field :email, placeholder: :email %>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <%= f.password_field :password, placeholder: "new password" %>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="controls">
+            <%= f.password_field :password_confirmation, placeholder: "new password conf." %>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="controls">
+            <%= f.password_field :current_password,
+                    :placeholder => "needed to confirm your changes" %>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <%= f.submit "Update", :class => "btn btn-primary" %>
+            <%= link_to "Cancel", "/", :class => "btn" %>
+          </div>
+        </div>
+      </fieldset>
+    <% end %>
+
+    <legend>Cancel account</legend>
+    <p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), :data => { :confirm => "Are you sure?" }, :method => :delete %>.</p>
+
+		<%= link_to "Back", :back %>
+		</div>
+</div>
+

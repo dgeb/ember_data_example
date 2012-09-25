@@ -1,0 +1,36 @@
+<div class="row equal-heights" style="text-align: center;">
+  <div class="span4 offset4">
+		<br/>
+		<br/>
+    <%= form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
+		  <%= devise_error_messages! %>
+      <fieldset>
+        <legend>Sign up</legend>
+        <br/>
+        <div class="control-group">
+          <div class="controls">
+            <%= f.email_field :email, placeholder: :email %>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <%= f.password_field :password, placeholder: :password %>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <%= f.password_field :password_confirmation, placeholder: "password confirmation" %>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <%= f.submit "Sign up", :class => "btn btn-primary" %>
+          </div>
+        </div>
+      </fieldset>
+    <% end %>
+    <%= render "devise/shared/links" %>
+  </div>
+</div>
+
+

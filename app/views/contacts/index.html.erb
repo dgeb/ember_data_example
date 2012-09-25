@@ -1,0 +1,21 @@
+<div class="row equal-heights" style="text-align: center;">
+  <div class="span6 offset3">
+    <header class="jumbotron masthead">
+      <br/>
+			<br/>
+
+			<h1 class="title">Contacts</h1>
+      <br/>
+      <div class="inner">
+       
+
+      </div>
+        <% if current_user %>
+          <footer class="footer">
+            <%= link_to "Sign out, #{current_user.email}", destroy_user_session_path, method: :delete %><br/>
+            <%= link_to "Edit profile", edit_user_registration_path %>
+          </footer>
+        <% end %>
+    </header>
+  </div>
+</div>

@@ -1,8 +1,12 @@
 class ContactsController < ApplicationController
+  
+  before_filter :authenticate_user!
+  
+  
   # GET /contacts
   # GET /contacts.json
   def index
-    contacts = Contact.all
+    contacts = Contact.where(user_id: current_user.id)
 
     respond_to do |format|
       format.html # index.html.erb
@@ -18,7 +22,7 @@ class ContactsController < ApplicationController
 
   # POST /contacts.json
   def create
-    contact = Contact.new(params[:contact])
+    contact = Contact.new(params[:contact].merge :user_id => current_user.id)
     if contact.save
       render json: contact, status: :created
     else
