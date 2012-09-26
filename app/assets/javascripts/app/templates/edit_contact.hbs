@@ -25,6 +25,14 @@
       {{view Ember.TextArea valueBinding="notes" id="notes" placeholder="Notes"}}
     </div>
   </div>
+  <div class="control-group">
+    {{#each phoneNumbers}}
+      <div class="controls">
+        {{view Ember.TextField valueBinding="number" placeholder="Number"}}
+      </div>
+    {{/each}}
+    <a class="btn" {{action addNumber}}>Add a phone number</a>  
+  </div>
 {{/with}}
 <div class="form-actions">
   {{#if content.id}}

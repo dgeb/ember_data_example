@@ -37,6 +37,10 @@ App.Router = Ember.Router.extend({
           router.get('editContactController').enterEditing();
         },
 
+        addNumber: function(router, event){
+            router.get('editContactController').addNumber();
+        },
+
         exit: function(router) {
           router.get('editContactController').exitEditing();
         }
@@ -53,7 +57,7 @@ App.Router = Ember.Router.extend({
           route: '/',
 
           showEdit: function(router) {
-            router.transitionTo('contacts.contact.edit');
+            router.transitionTo('edit');
           },
 
           connectOutlets: function(router, context) {
@@ -66,6 +70,10 @@ App.Router = Ember.Router.extend({
 
           cancelEdit: function(router) {
             router.transitionTo('contacts.contact.index');
+          },
+
+          addNumber: function(router, event){
+            router.get('editContactController').addNumber();
           },
 
           connectOutlets: function(router) {
