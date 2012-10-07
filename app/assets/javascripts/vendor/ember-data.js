@@ -1,6 +1,6 @@
 (function() {
 window.DS = Ember.Namespace.create({
-  CURRENT_API_REVISION: 5
+  CURRENT_API_REVISION: 6
 });
 
 })();
@@ -903,12 +903,24 @@ var CREATED = { created: true };
 //   The variables in this file are consistently named according to the following
 //   scheme:
 //
-//   * +id+ means an identifier managed by an external source, provided inside the
-//     data hash provided by that source.
+//   * +id+ means an identifier managed by an external source, provided inside
+//     the data hash provided by that source.
 //   * +clientId+ means a transient numerical identifier generated at runtime by
 //     the data store. It is important primarily because newly created objects may
 //     not yet have an externally generated id.
 //   * +type+ means a subclass of DS.Model.
+
+// Used by the store to normalize IDs entering the store.  Despite the fact
+// that developers may provide IDs as numbers (e.g., `store.find(Person, 1)`),
+// it is important that internally we use strings, since IDs may be serialized
+// and lose type information.  For example, Ember's router may put a record's
+// ID into the URL, and if we later try to deserialize that URL and find the
+// corresponding record, we will not know if it is a string or a number.
+var coerceId = function(id) {
+  return id+'';
+};
+
+var map = Ember.EnumerableUtils.map;
 
 /**
   The store contains all of the hashes for records loaded from the server.
@@ -1171,10 +1183,12 @@ DS.Store = Ember.Object.extend({
     if (Ember.none(id)) {
       adapter = get(this, 'adapter');
       if (adapter && adapter.generateIdForRecord) {
-        id = adapter.generateIdForRecord(this, record);
+        id = coerceId(adapter.generateIdForRecord(this, record));
         properties.id = id;
       }
     }
+
+    id = coerceId(id);
 
     // Create a new `clientId` and associate it with the
     // specified (or generated) `id`. Since we don't have
@@ -1276,18 +1290,17 @@ DS.Store = Ember.Object.extend({
     You can check whether a query results `RecordArray` has loaded
     by checking its `isLoaded` property.
   */
-  find: function(type, id, query) {
+  find: function(type, id) {
     if (id === undefined) {
       return this.findAll(type);
     }
 
-    if (query !== undefined) {
-      return this.findMany(type, id, query);
-    } else if (Ember.typeOf(id) === 'object') {
+    // We are passed a query instead of an id.
+    if (Ember.typeOf(id) === 'object') {
       return this.findQuery(type, id);
     }
 
-    return this.findById(type, id);
+    return this.findById(type, coerceId(id));
   },
 
   /**
@@ -1425,7 +1438,7 @@ DS.Store = Ember.Object.extend({
   fetchMany: function(type, clientIds) {
     var clientIdToId = this.clientIdToId;
 
-    var neededIds = Ember.EnumerableUtils.map(clientIds, function(clientId) {
+    var neededIds = map(clientIds, function(clientId) {
       return clientIdToId[clientId];
     });
 
@@ -1466,6 +1479,7 @@ DS.Store = Ember.Object.extend({
     // 6. Ask the adapter to load the records for the unloaded clientIds (but
     //    convert them back to ids)
 
+    ids = map(ids, function(id) { return coerceId(id); });
     var clientIds = this.clientIdsForIds(type, ids);
 
     var neededClientIds = this.neededClientIds(type, clientIds),
@@ -2155,8 +2169,9 @@ DS.Store = Ember.Object.extend({
     @param {String|Number} id
   */
   clientIdForId: function(type, id) {
-    var clientId = this.typeMapFor(type).idToCid[id];
+    id = coerceId(id);
 
+    var clientId = this.typeMapFor(type).idToCid[id];
     if (clientId !== undefined) { return clientId; }
 
     return this.pushHash(UNLOADED, id, type);
@@ -2173,7 +2188,9 @@ DS.Store = Ember.Object.extend({
     var typeMap = this.typeMapFor(type),
         idToClientIdMap = typeMap.idToCid;
 
-    return Ember.EnumerableUtils.map(ids, function(id) {
+    return map(ids, function(id) {
+      id = coerceId(id);
+
       var clientId = idToClientIdMap[id];
       if (clientId) { return clientId; }
       return this.pushHash(UNLOADED, id, type);
@@ -2212,6 +2229,8 @@ DS.Store = Ember.Object.extend({
       id = adapter.extractId(type, hash);
     }
 
+    id = coerceId(id);
+
     var typeMap = this.typeMapFor(type),
         cidToHash = this.clientIdToHash,
         clientId = typeMap.idToCid[id];
@@ -2241,7 +2260,7 @@ DS.Store = Ember.Object.extend({
 
       var adapter = get(this, '_adapter');
 
-      ids = Ember.EnumerableUtils.map(hashes, function(hash) {
+      ids = map(hashes, function(hash) {
         return adapter.extractId(type, hash);
       });
     }
@@ -4233,9 +4252,10 @@ Ember.onLoad('Ember.Application', function(Application) {
 
   Application.registerInjection({
     name: "giveStoreToControllers",
+    after: ['store','controllers'],
 
     injection: function(app, stateManager, property) {
-      if (property.match(/Controller$/)) {
+      if (/^[A-Z].*Controller$/.test(property)) {
         var controllerName = property.charAt(0).toLowerCase() + property.substr(1);
         var store = stateManager.get('store');
         var controller = stateManager.get(controllerName);
@@ -4498,7 +4518,8 @@ DS.Serializer = Ember.Object.extend({
 
   addId: function(hash, type, id) {
     var primaryKey = this._primaryKey(type);
-    hash[primaryKey] = id;
+
+    hash[primaryKey] = this.serializeId(id);
   },
 
   addRelationships: function(hash, record) {
@@ -4515,6 +4536,23 @@ DS.Serializer = Ember.Object.extend({
 
   addBelongsTo: Ember.K,
   addHasMany: Ember.K,
+
+  /**
+   Allows IDs to be normalized before being sent back to the
+   persistence layer. Because the store coerces all IDs to strings
+   for consistency, this is the opportunity for the serializer to,
+   for example, convert numerical IDs back into number form.
+  */
+  serializeId: function(id) {
+    if (isNaN(id)) { return id; }
+    return +id;
+  },
+
+  serializeIds: function(ids) {
+    return Ember.EnumerableUtils.map(ids, function(id) {
+      return this.serializeId(id);
+    }, this);
+  },
 
   /**
     DESERIALIZATION
@@ -4556,7 +4594,12 @@ DS.Serializer = Ember.Object.extend({
 
   extractId: function(type, hash) {
     var primaryKey = this._primaryKey(type);
-    return hash[primaryKey];
+
+    // Ensure that we coerce IDs to strings so that record
+    // IDs remain consistent between application runs; especially
+    // if the ID is serialized and later deserialized from the URL,
+    // when type information will have been lost.
+    return hash[primaryKey]+'';
   },
 
   materializeRelationships: function(record, hash) {
@@ -4620,7 +4663,7 @@ DS.Serializer = Ember.Object.extend({
     this.mappings = reifiedMappings;
 
     this._didReifyMappings = true;
-  },
+  }
 });
 
 
@@ -5235,6 +5278,8 @@ DS.RESTAdapter = DS.Adapter.extend({
   },
 
   findMany: function(store, type, ids) {
+    ids = this.get('serializer').serializeIds(ids);
+
     var root = this.rootForType(type), plural = this.pluralize(root);
 
     this.ajax(this.buildURL(root), "GET", {
