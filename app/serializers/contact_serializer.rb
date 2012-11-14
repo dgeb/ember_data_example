@@ -3,5 +3,6 @@ class ContactSerializer < ActiveModel::Serializer
              :first_name,
              :last_name,
              :email,
-             :notes
+             :notes,
+             :user_id
 end

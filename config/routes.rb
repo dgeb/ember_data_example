@@ -1,4 +1,7 @@
 EmberDataExample::Application.routes.draw do
-  root :to => 'contacts#index'
+  devise_for :users
+
+  root :to => redirect('/contacts')
   resources :contacts
+  
 end
