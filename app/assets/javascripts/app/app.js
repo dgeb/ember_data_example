@@ -1,5 +1,5 @@
 App = Em.Application.create();
 App.Store = DS.Store.extend({
   adapter:  DS.RESTAdapter.create(),
-  revision: 7
+  revision: 8
 });
