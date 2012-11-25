@@ -11,7 +11,7 @@ group :assets do
   gem 'anjlab-bootstrap-rails', '>= 2.1', :require => 'bootstrap-rails'
 end
 
-gem 'active_model_serializers', github: 'josevalim/active_model_serializers'
+gem 'active_model_serializers', github: 'rails-api/active_model_serializers'
 gem 'jquery-rails'
 gem 'ember-rails', '>= 0.4.0'
 

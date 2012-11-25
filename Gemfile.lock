@@ -1,9 +1,9 @@
 GIT
-  remote: git://github.com/josevalim/active_model_serializers.git
-  revision: a21529370cb1fef30af92393ee209c53a6c86ba8
+  remote: git://github.com/rails-api/active_model_serializers.git
+  revision: 470d65d12fe25b4353636bc09e8ca35e1bd00324
   specs:
-    active_model_serializers (0.5.0)
-      activemodel (~> 3.0)
+    active_model_serializers (0.5.2)
+      activemodel (>= 3.0)
 
 GEM
   remote: http://rubygems.org/
