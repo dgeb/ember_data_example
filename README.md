@@ -2,8 +2,8 @@
 
 This is a simple Rails 3.2 app created to demo [Ember.js](https://github.com/emberjs/ember.js),
 [Ember-Data](https://github.com/emberjs/data) and
-[Active Model Serializers](https://github.com/josevalim/active_model_serializers).
-It uses the edge versions of Ember (post 1.0.pre) and Ember Data (after the merge of the relationship-improvements branch),
+[Active Model Serializers](https://github.com/rails-api/active_model_serializers).
+It uses the edge versions of Ember (post 1.0.pre) and Ember Data,
 and therefore may be unstable.
 
 The app itself is a simple, single-page contact manager styled with Twitter Bootstrap.
