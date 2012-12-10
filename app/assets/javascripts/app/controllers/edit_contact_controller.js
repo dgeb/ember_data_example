@@ -35,6 +35,8 @@ App.EditContactController = Em.Controller.extend({
   },
 
   showRecord: function() {
-    App.router.transitionTo('contacts.contact.index', this.get('content'));
+    var content = this.get('content');
+    content.removeObserver('id', this, 'showRecord');
+    App.router.transitionTo('contacts.contact.index', content);
   }
 });
