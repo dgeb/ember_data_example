@@ -4,4 +4,5 @@ class ContactSerializer < ActiveModel::Serializer
              :last_name,
              :email,
              :notes
+  has_many :hobbies
 end

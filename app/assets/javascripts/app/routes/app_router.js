@@ -13,6 +13,12 @@ App.Router = Ember.Router.extend({
         router.transitionTo('contacts.newContact', {});
       },
 
+      showNewHobby: function(router, context) {
+        hobbies = router.get('editContactController').content.get('hobbies');
+        new_hobby = App.Hobby.createRecord();
+        hobbies.pushObject(new_hobby);
+      },
+
       connectOutlets: function(router) {
         router.get('applicationController').connectOutlet('contacts', router.get('store').findAll(App.Contact));
       },
