@@ -19,6 +19,20 @@
       {{view Ember.TextField valueBinding="email" id="email" type="email" placeholder="Email address"}}
     </div>
   </div>
+
+  <div class="control-group">
+    <label class="control-label" for="email">Hobbies</label>
+    {{#each hobby in hobbies}}
+      <div class="controls">
+        {{view Ember.TextField valueBinding="hobby" placeholder="Hobby"}}
+      </div>
+    {{/each}}
+    
+    <div class="controls">
+      <a class="btn" {{action showNewHobby}}><i class="icon-plus-sign"></i> Add Hobby</a>
+    </div>
+  <div>
+
   <div class="control-group">
     <label class="control-label" for="notes">Notes</label>
     <div class="controls">

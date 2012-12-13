@@ -11,11 +11,13 @@ group :assets do
   gem 'anjlab-bootstrap-rails', '>= 2.1', :require => 'bootstrap-rails'
 end
 
-gem 'active_model_serializers', github: 'rails-api/active_model_serializers'
+gem 'active_model_serializers'
 gem 'jquery-rails'
 gem 'ember-rails', '>= 0.4.0'
 
 group :test do
   # Pretty printed test output
-  gem 'turn', '~> 0.8.3', require: false
+  gem 'turn', '~> 0.8.3'
 end
+
+gem 'unicorn'

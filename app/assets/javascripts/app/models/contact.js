@@ -4,6 +4,14 @@ App.Contact  = DS.Model.extend({
   email:     DS.attr('string'),
   notes:     DS.attr('string'),
 
+  hobbies: DS.hasMany('App.Hobby', { embedded: true }),
+
+  toJSON: function(options) {
+    if (!options) { options = {}; }
+    options['associations'] = true;
+    this._super(options);
+  },
+
   fullName: function() {
     var firstName = this.get('firstName'),
         lastName = this.get('lastName');
