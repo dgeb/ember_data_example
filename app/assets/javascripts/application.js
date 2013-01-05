@@ -9,8 +9,8 @@
 //= require vendor/ember
 //= require vendor/ember-data
 //= require vendor/md5
+//= require vendor/ember-bootstrap
 //= require jquery_ujs
+//= require twitter/bootstrap
 //= require_tree ./lib
 //= require_tree ./app
-
-App.initialize();

@@ -1,9 +1,9 @@
-<div class="navbar navbar-inverse navbar-fixed-top">
+<div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container-fluid">
       <div class="brand">Ember Contacts</div>
       <div class="btn-group pull-right">
-        <a class="btn" {{action showNewContact}}><i class="icon-plus-sign"></i> Add Contact</a>
+        {{#linkTo "addContact" class="btn"}}<i class="icon-plus-sign"></i> Add Contact{{/linkTo}}
       </div>
     </div>
   </div>

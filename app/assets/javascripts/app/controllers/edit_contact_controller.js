@@ -1,28 +1,16 @@
-App.EditContactController = Em.Controller.extend({
+App.EditContactController = Em.ObjectController.extend({
   content: null,
-
-  enterEditing: function() {
-    this.transaction = this.get('store').transaction();
-    if (this.get('content.id')) {
-      this.transaction.add(this.get('content'));
-    } else {
-      this.set('content', this.transaction.createRecord(App.Contact, {}));
-    }
-  },
-
+  
   exitEditing: function() {
-    if (this.transaction) {
-      this.transaction.rollback();
-      this.transaction = null;
-    }
+    this.get('transaction').rollback();
+    if(this.get('content.id'))
+      this.get('target.router').transitionTo('contact', this.get('content'));
+    else
+      this.get('target.router').transitionTo('contactsIndex');
   },
 
   updateRecord: function() {
-    // TODO - validations
-
-    // commit and then clear the transaction (so exitEditing doesn't attempt a rollback)
-    this.transaction.commit();
-    this.transaction = null;
+    this.get('store').commit();
 
     if (this.get('content.isNew')) {
       // when creating new records, it's necessary to wait for the record to be assigned
@@ -37,6 +25,6 @@ App.EditContactController = Em.Controller.extend({
   showRecord: function() {
     var content = this.get('content');
     content.removeObserver('id', this, 'showRecord');
-    App.router.transitionTo('contacts.contact.index', content);
+    this.get('target.router').transitionTo('contact', content);
   }
 });

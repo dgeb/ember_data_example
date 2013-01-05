@@ -16,3 +16,5 @@
 
 # Ignore bin directory
 /bin
+
+.DS_Store

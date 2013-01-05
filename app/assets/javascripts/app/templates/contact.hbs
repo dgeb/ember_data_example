@@ -1,1 +1,17 @@
-{{outlet}}
+<h2><img {{bindAttr src="gravatar"}} />{{fullName}}</h2>
+
+<dl class="dl-horizontal">
+  {{#if email}}
+    <dt>Email:</dt>
+    <dd>{{mailto email}}</dd>
+  {{/if}}
+  {{#if notes}}
+    <dt>Notes:</dt>
+    <dd>{{notes}}</dd>
+  {{/if}}
+</dl>
+
+<div class="well well-small">
+  {{#linkTo "editContact" content class="btn"}}Edit{{/linkTo}}
+  <a class="btn btn-danger" {{action destroyRecord target="controller"}}>Remove</a>
+</div>
