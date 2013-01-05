@@ -1,84 +1,46 @@
 App.Router = Ember.Router.extend({
-  location: 'hash',
-  
-  root: Em.Route.extend({
-    contacts: Em.Route.extend({
-      route: '/',
-      
-      showContact: function(router, event) {
-        router.transitionTo('contacts.contact.index', event.context);
-      },
+  location: 'history',
+  enableLogging: true
+});
 
-      showNewContact: function(router) {
-        router.transitionTo('contacts.newContact', {});
-      },
+App.Router.map(function(match) {
+  match('/').to('index');
+  match('/contacts').to('contacts', function(match) {
+    match('/').to('contactsIndex');
+    match('/new').to('addContact');
+    match('/:contact_id').to('contact');
+    match('/:contact_id/edit').to('editContact');
+  });
+});
 
-      connectOutlets: function(router) {
-        router.get('applicationController').connectOutlet('contacts', router.get('store').findAll(App.Contact));
-      },
+App.IndexRoute = Ember.Route.extend({
+  redirect: function() {
+    this.transitionTo('contactsIndex');
+  }
+});
 
-      index: Em.Route.extend({
-        route: '/',
+App.ContactsRoute = Ember.Route.extend({
+  model: function() {
+    return App.Contact.find();
+  }
+});
 
-        connectOutlets: function(router) {
-          router.get('applicationController').connectOutlet('contacts');
-        }
-      }),
+App.ContactRoute = Ember.Route.extend({
+  setupControllers: function(controller, param) {
+    this.controllerFor('contacts').set('activeContactID', param.id);
+    controller.set('content', App.Contact.find(param.id));
+  }
+});
 
-      newContact: Em.Route.extend({
-        route: '/contacts/new',
-
-        cancelEdit: function(router) {
-          router.transitionTo('contacts.index');
-        },
-
-        connectOutlets: function(router) {
-          router.get('contactsController').connectOutlet('editContact', {});
-          router.get('editContactController').enterEditing();
-        },
-
-        exit: function(router) {
-          router.get('editContactController').exitEditing();
-        }
-      }),
-
-      contact: Em.Route.extend({
-        route: '/contacts/:contact_id',
-
-        connectOutlets: function(router, context) {
-          router.get('contactsController').connectOutlet('contact', context);
-        },
-
-        index: Em.Route.extend({
-          route: '/',
-
-          showEdit: function(router) {
-            router.transitionTo('contacts.contact.edit');
-          },
-
-          connectOutlets: function(router, context) {
-            router.get('contactController').connectOutlet('showContact');
-          }
-        }),
-
-        edit: Em.Route.extend({
-          route: 'edit',
-
-          cancelEdit: function(router) {
-            router.transitionTo('contacts.contact.index');
-          },
-
-          connectOutlets: function(router) {
-            var contactController = router.get('contactController');
-            contactController.connectOutlet('editContact', contactController.get('content'));
-            router.get('editContactController').enterEditing();
-          },
-
-          exit: function(router) {
-            router.get('editContactController').exitEditing();
-          }
-        })
-      })
-    })
-  })
+App.AddContactRoute = Ember.Route.extend({
+  renderTemplates: function() {
+    this.render('editContact', { controller: this.controllerFor('editContact') });
+  },
+  setupControllers: function(controller) {
+    var controller = this.controllerFor('editContact'),
+        newRecord = controller.get('store').createRecord(App.Contact, {});
+    this.controllerFor('contacts').set('activeContactID', null);
+    newRecord.set('isActive', true);
+    controller.set('content', newRecord);
+  }
 });
