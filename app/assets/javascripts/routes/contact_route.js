@@ -1,6 +1,6 @@
 App.ContactRoute = Ember.Route.extend({
-  setupControllers: function(controller, param) {
-    this.controllerFor('contacts').set('activeContactID', param.id);
-    controller.set('content', App.Contact.find(param.id));
+  setupController: function(controller, model) {
+    this.controllerFor('contacts').set('activeContactID', model.id);
+    controller.set('content', App.Contact.find(model.id));
   }
 });
