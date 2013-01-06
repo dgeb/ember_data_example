@@ -1357,6 +1357,18 @@ DS.Store = Ember.Object.extend(DS._Mappable, {
     return record;
   },
 
+  reloadRecord: function(record) {
+    var type = record.constructor,
+        adapter = this.adapterForType(type),
+        id = get(record, 'id');
+
+    Ember.assert("You cannot update a record without an ID", id);
+    Ember.assert("You tried to update a record but you have no adapter (for " + type + ")", adapter);
+    Ember.assert("You tried to update a record but your adapter does not implement `find`", adapter.find);
+
+    adapter.find(this, type, id);
+  },
+
   /**
     @private
 
@@ -2695,7 +2707,7 @@ DS.Store.reopenClass({
 
 (function() {
 var get = Ember.get, set = Ember.set, guidFor = Ember.guidFor,
-    arrayMap = Ember.ArrayPolyfills.map;
+    once = Ember.run.once, arrayMap = Ember.ArrayPolyfills.map;
 
 /**
   This file encapsulates the various states that a record can transition
@@ -2897,6 +2909,7 @@ var updateRecordArrays = function(manager) {
 
 DS.State = Ember.State.extend({
   isLoaded: stateProperty,
+  isReloading: stateProperty,
   isDirty: stateProperty,
   isSaving: stateProperty,
   isDeleted: stateProperty,
@@ -3167,6 +3180,7 @@ var states = {
   rootState: Ember.State.create({
     // FLAGS
     isLoaded: false,
+    isReloading: false,
     isDirty: false,
     isSaving: false,
     isDeleted: false,
@@ -3244,6 +3258,32 @@ var states = {
         })
       }),
 
+      reloading: DS.State.create({
+        // FLAGS
+        isReloading: true,
+
+        // TRANSITIONS
+        enter: function(manager) {
+          var record = get(manager, 'record'),
+              store = get(record, 'store');
+
+          store.reloadRecord(record);
+        },
+
+        exit: function(manager) {
+          var record = get(manager, 'record');
+
+          once(record, 'trigger', 'didReload');
+        },
+
+        // EVENTS
+        loadedData: didChangeData,
+
+        materializingData: function(manager) {
+          manager.transitionTo('loaded.materializing');
+        }
+      }),
+
       // If there are no local changes to a record, it remains
       // in the `saved` state.
       saved: DS.State.create({
@@ -3253,6 +3293,10 @@ var states = {
 
         didChangeData: didChangeData,
         loadedData: didChangeData,
+
+        reloadRecord: function(manager) {
+          manager.transitionTo('loaded.reloading');
+        },
 
         materializingData: function(manager) {
           manager.transitionTo('loaded.materializing');
@@ -3479,6 +3523,7 @@ var retrieveFromCurrentState = Ember.computed(function(key) {
 
 DS.Model = Ember.Object.extend(Ember.Evented, LoadPromise, {
   isLoaded: retrieveFromCurrentState,
+  isReloading: retrieveFromCurrentState,
   isDirty: retrieveFromCurrentState,
   isSaving: retrieveFromCurrentState,
   isDeleted: retrieveFromCurrentState,
@@ -3510,6 +3555,7 @@ DS.Model = Ember.Object.extend(Ember.Evented, LoadPromise, {
   },
 
   didLoad: Ember.K,
+  didReload: Ember.K,
   didUpdate: Ember.K,
   didCreate: Ember.K,
   didDelete: Ember.K,
@@ -3575,6 +3621,17 @@ DS.Model = Ember.Object.extend(Ember.Evented, LoadPromise, {
 
   setProperty: function(key, value, oldValue) {
     this.send('setProperty', { key: key, value: value, oldValue: oldValue });
+  },
+
+  /**
+    Reload the record from the adapter.
+
+    This will only work if the record has already finished loading
+    and has not yet been modified (`isLoaded` but not `isDirty`,
+    or `isSaving`).
+  */
+  reload: function() {
+    this.send('reloadRecord');
   },
 
   deleteRecord: function() {
@@ -4455,15 +4512,15 @@ DS.RelationshipChange.determineRelationshipType = function(recordType, knownSide
   var knownContainerType = knownSide.kind;
   var options = recordType.metaForProperty(knownKey).options;
   var otherType = DS._inverseTypeFor(recordType, knownKey);
-    
+
   if(options.inverse){
     key = options.inverse;
-    otherContainerType = get(otherType, 'relationshipsByName').get(key).kind; 
-  } 
+    otherContainerType = get(otherType, 'relationshipsByName').get(key).kind;
+  }
   else if(assoc = DS._inverseRelationshipFor(otherType, recordType)){
     key = assoc.name;
     otherContainerType = assoc.kind;
-  } 
+  }
   if(!key){
     return knownContainerType === "belongsTo" ? "oneToNone" : "manyToNone";
   }
@@ -4474,8 +4531,8 @@ DS.RelationshipChange.determineRelationshipType = function(recordType, knownSide
     else{
       return knownContainerType === "belongsTo" ? "oneToMany" : "manyToMany";
     }
-  } 
- 
+  }
+
 };
 
 DS.RelationshipChange.createChange = function(firstRecordClientId, secondRecordClientId, store, options){
@@ -4483,22 +4540,22 @@ DS.RelationshipChange.createChange = function(firstRecordClientId, secondRecordC
   var firstRecordType = store.typeForClientId(firstRecordClientId), key, changeType;
   changeType = DS.RelationshipChange.determineRelationshipType(firstRecordType, options);
   if (changeType === "oneToMany"){
-    return DS.OneToManyChange.createChange(firstRecordClientId, secondRecordClientId, store, options); 
+    return DS.OneToManyChange.createChange(firstRecordClientId, secondRecordClientId, store, options);
   }
   else if (changeType === "manyToOne"){
-    return DS.OneToManyChange.createChange(secondRecordClientId, firstRecordClientId, store, options); 
+    return DS.OneToManyChange.createChange(secondRecordClientId, firstRecordClientId, store, options);
   }
   else if (changeType === "oneToNone"){
-    return DS.OneToNoneChange.createChange(firstRecordClientId, "", store, options); 
+    return DS.OneToNoneChange.createChange(firstRecordClientId, "", store, options);
   }
   else if (changeType === "manyToNone"){
-    return DS.ManyToNoneChange.createChange(firstRecordClientId, "", store, options); 
+    return DS.ManyToNoneChange.createChange(firstRecordClientId, "", store, options);
   }
   else if (changeType === "oneToOne"){
-    return DS.OneToOneChange.createChange(firstRecordClientId, secondRecordClientId, store, options); 
+    return DS.OneToOneChange.createChange(firstRecordClientId, secondRecordClientId, store, options);
   }
   else if (changeType === "manyToMany"){
-    return DS.ManyToManyChange.createChange(firstRecordClientId, secondRecordClientId, store, options); 
+    return DS.ManyToManyChange.createChange(firstRecordClientId, secondRecordClientId, store, options);
   }
 };
 
@@ -4516,7 +4573,7 @@ DS.OneToNoneChange.createChange = function(childClientId, parentClientId, store,
   store.addRelationshipChangeFor(childClientId, key, parentClientId, null, change);
 
   return change;
-};  
+};
 
 /** @private */
 DS.ManyToNoneChange.createChange = function(childClientId, parentClientId, store, options) {
@@ -4531,14 +4588,14 @@ DS.ManyToNoneChange.createChange = function(childClientId, parentClientId, store
 
   store.addRelationshipChangeFor(childClientId, key, parentClientId, null, change);
   return change;
-};  
+};
 
 
 /** @private */
 DS.ManyToManyChange.createChange = function(childClientId, parentClientId, store, options) {
   // Get the type of the child based on the child's client ID
   var childType = store.typeForClientId(childClientId), key;
-  
+
   // If the name of the belongsTo side of the relationship is specified,
   // use that
   // If the type of the parent is specified, look it up on the child's type
@@ -4565,7 +4622,7 @@ DS.ManyToManyChange.createChange = function(childClientId, parentClientId, store
 DS.OneToOneChange.createChange = function(childClientId, parentClientId, store, options) {
   // Get the type of the child based on the child's client ID
   var childType = store.typeForClientId(childClientId), key;
-  
+
   // If the name of the belongsTo side of the relationship is specified,
   // use that
   // If the type of the parent is specified, look it up on the child's type
@@ -4616,7 +4673,7 @@ DS.OneToOneChange.maintainInvariant = function(options, store, childClientId, ke
 DS.OneToManyChange.createChange = function(childClientId, parentClientId, store, options) {
   // Get the type of the child based on the child's client ID
   var childType = store.typeForClientId(childClientId), key;
-  
+
   // If the name of the belongsTo side of the relationship is specified,
   // use that
   // If the type of the parent is specified, look it up on the child's type
@@ -6432,8 +6489,12 @@ DS.JSONSerializer = DS.Serializer.extend({
   },
 
   rootForType: function(type) {
+    var typeString = type.toString();
+
+    Ember.assert("Your model must not be anonymous. It was " + type, typeString.charAt(0) !== '(');
+
     // use the last part of the name as the URL
-    var parts = type.toString().split(".");
+    var parts = typeString.split(".");
     var name = parts[parts.length - 1];
     return name.replace(/([A-Z])/g, '_$1').toLowerCase().slice(1);
   }
@@ -6565,7 +6626,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
         occupations: [{
           id: 345,
           title: "Tricycle Mechanic"
-        }]    
+        }]
       });
     ```
 
@@ -6595,12 +6656,12 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     For example, the `RESTAdapter` saves newly created records by
     making an Ajax request. When the server returns, the adapter
     calls didCreateRecord. If the server returns a response body,
-    it is passed as the payload. 
+    it is passed as the payload.
 
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} record
-    @param {any} payload 
+    @param {any} payload
   */
   didCreateRecord: function(store, type, record, payload) {
     store.didSaveRecord(record);
@@ -6622,7 +6683,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     Acknowledges that the adapter has finished creating several records.
 
     Your adapter should call this method from `createRecords` when it
-    has saved multiple created records to its persistent storage 
+    has saved multiple created records to its persistent storage
     received an acknowledgement.
 
     If the persistent storage returns a new payload in response to the
@@ -6632,7 +6693,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} record
-    @param {any} payload 
+    @param {any} payload
   */
   didCreateRecords: function(store, type, records, payload) {
     records.forEach(function(record) {
@@ -6661,7 +6722,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} record
-    @param {any} payload 
+    @param {any} payload
   */
   didSaveRecord: function(store, type, record, payload) {
     store.didSaveRecord(record);
@@ -6694,7 +6755,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} record
-    @param {any} payload 
+    @param {any} payload
   */
   didUpdateRecord: function() {
     this.didSaveRecord.apply(this, arguments);
@@ -6713,14 +6774,14 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} record
-    @param {any} payload 
+    @param {any} payload
   */
   didDeleteRecord: function() {
     this.didSaveRecord.apply(this, arguments);
   },
 
   /**
-    Acknowledges that the adapter has finished updating or deleting 
+    Acknowledges that the adapter has finished updating or deleting
     multiple records.
 
     Your adapter should call this method from its `updateRecords` or
@@ -6733,7 +6794,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} records
-    @param {any} payload 
+    @param {any} payload
   */
   didSaveRecords: function(store, type, records, payload) {
     records.forEach(function(record) {
@@ -6759,7 +6820,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} records
-    @param {any} payload 
+    @param {any} payload
   */
   didUpdateRecords: function() {
     this.didSaveRecords.apply(this, arguments);
@@ -6778,7 +6839,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} records
-    @param {any} payload 
+    @param {any} payload
   */
   didDeleteRecords: function() {
     this.didSaveRecords.apply(this, arguments);
@@ -6796,7 +6857,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
 
     @param {DS.Store} store
     @param {subclass of DS.Model} type
-    @param {any} payload 
+    @param {any} payload
     @param {String} id
   */
   didFindRecord: function(store, type, payload, id) {
@@ -6820,7 +6881,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
 
     @param {DS.Store} store
     @param {subclass of DS.Model} type
-    @param {any} payload 
+    @param {any} payload
   */
   didFindAll: function(store, type, payload) {
     var loader = DS.loaderFor(store),
@@ -6839,7 +6900,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
 
     @param {DS.Store} store
     @param {subclass of DS.Model} type
-    @param {any} payload 
+    @param {any} payload
     @param {DS.AdapterPopulatedRecordArray} recordArray
   */
   didFindQuery: function(store, type, payload, recordArray) {
@@ -6860,7 +6921,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
 
     @param {DS.Store} store
     @param {subclass of DS.Model} type
-    @param {any} payload 
+    @param {any} payload
   */
   didFindMany: function(store, type, payload) {
     var loader = DS.loaderFor(store);
