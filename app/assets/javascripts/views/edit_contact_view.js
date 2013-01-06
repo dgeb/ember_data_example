@@ -1,5 +1,5 @@
 App.EditContactView = Ember.View.extend({
-  templateName: 'app/templates/edit_contact',
+  templateName: 'edit_contact',
   tagName: 'form',
   classNames: 'form-horizontal',
 

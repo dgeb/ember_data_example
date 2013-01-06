@@ -11,4 +11,4 @@
 //= require vendor/md5
 //= require jquery_ujs
 //= require_tree ./lib
-//= require app/app
+//= require app
