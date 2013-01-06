@@ -1,12 +1,19 @@
 App.AddContactRoute = Ember.Route.extend({
-  renderTemplates: function() {
-    this.render('editContact', { controller: this.controllerFor('editContact') });
+  init: function() {
+    this._super();
+
+    // reuse the EditContactController for adding contacts
+    this.container.register('controller', 'addContact', App.EditContactController);
   },
-  setupControllers: function(controller) {
-    var controller = this.controllerFor('editContact'),
-        newRecord = controller.get('store').createRecord(App.Contact, {});
+
+  setupController: function(controller) {
+    var newRecord = controller.get('store').createRecord(App.Contact, {});
     this.controllerFor('contacts').set('activeContactID', null);
     newRecord.set('isActive', true);
     controller.set('content', newRecord);
+  },
+
+  renderTemplate: function() {
+    this.render('editContact');
   }
 });
