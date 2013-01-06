@@ -13,7 +13,7 @@ end
 
 gem 'active_model_serializers', github: 'rails-api/active_model_serializers'
 gem 'jquery-rails'
-gem 'ember-rails', '>= 0.4.0'
+gem 'ember-rails', github: 'emberjs/ember-rails'
 
 group :test do
   # Pretty printed test output

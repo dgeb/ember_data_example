@@ -1,4 +1,14 @@
 GIT
+  remote: git://github.com/emberjs/ember-rails.git
+  revision: e7273f331370a5a5a4758ee4de40cce5bd55b39a
+  specs:
+    ember-rails (0.8.0)
+      active_model_serializers
+      barber
+      execjs (>= 1.2)
+      railties (>= 3.1)
+
+GIT
   remote: git://github.com/rails-api/active_model_serializers.git
   revision: 470d65d12fe25b4353636bc09e8ca35e1bd00324
   specs:
@@ -40,11 +50,9 @@ GEM
       sass (>= 3.2)
     ansi (1.4.3)
     arel (3.0.2)
+    barber (0.1.3)
+      execjs
     builder (3.0.3)
-    ember-rails (0.7.0)
-      active_model_serializers
-      execjs (>= 1.2)
-      railties (~> 3.1)
     erubis (2.7.0)
     execjs (1.4.0)
       multi_json (~> 1.0)
@@ -115,7 +123,7 @@ PLATFORMS
 DEPENDENCIES
   active_model_serializers!
   anjlab-bootstrap-rails (>= 2.1)
-  ember-rails (>= 0.4.0)
+  ember-rails!
   jquery-rails
   rails (= 3.2.8)
   sass-rails
