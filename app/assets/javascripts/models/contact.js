@@ -9,7 +9,7 @@ App.Contact  = DS.Model.extend({
         lastName = this.get('lastName');
 
     if (!firstName && !lastName) {
-      if (this.get('id') === undefined) {
+      if (Ember.isNone( this.get('id'))) {
         return '(New Contact)';
       } else {
         return '(No Name)';
