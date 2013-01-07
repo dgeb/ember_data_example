@@ -2,8 +2,9 @@ App.EditContactRoute = Ember.Route.extend({
   setupController: function(controller, model) {
     this._super(controller, model);
 
-    // notify the controller that editing has begun
-    controller.enterEditing();
+    // add the model to a local transaction
+    this.transaction = controller.get('store').transaction();
+    this.transaction.add(model);
 
     // highlight this contact as active
     this.controllerFor('contacts').set('activeContactId', model.get('id'));
@@ -12,8 +13,10 @@ App.EditContactRoute = Ember.Route.extend({
   exit: function() {
     this._super();
 
-    // notify the controller that editing has finished
-    this.controllerFor(this.templateName).exitEditing();
+    // rollback the local transaction if it hasn't already been cleared
+    if (this.transaction) {
+      this.transaction.rollback();
+    }
 
     // no contact is active (momentarily, at least)
     this.controllerFor('contacts').set('activeContactId', null);
@@ -21,6 +24,12 @@ App.EditContactRoute = Ember.Route.extend({
 
   events: {
     cancel: function(contact) {
+      this.transitionTo('contact', contact);
+    },
+
+    save: function(contact) {
+      this.transaction.commit();
+      this.transaction = null;
       this.transitionTo('contact', contact);
     }
   }

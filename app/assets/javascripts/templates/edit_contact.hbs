@@ -1,36 +1,37 @@
-<legend>{{#if id}}Edit{{else}}Create{{/if}} Contact</legend>
+<form {{action save content on="submit"}} class="form-horizontal">
+  <legend>{{#if id}}Edit{{else}}Create{{/if}} Contact</legend>
 
-<div class="control-group">
-  <label class="control-label" for="firstName">First name</label>
-  <div class="controls">
-    {{view Ember.TextField valueBinding="firstName" id="firstName" placeholder="First name" required="true"}}
+  <div class="control-group">
+    <label class="control-label" for="firstName">First name</label>
+    <div class="controls">
+      {{view Ember.TextField valueBinding="firstName" id="firstName" placeholder="First name" required="true"}}
+    </div>
   </div>
-</div>
-<div class="control-group">
-  <label class="control-label" for="lastName">Last name</label>
-  <div class="controls">
-    {{view Ember.TextField valueBinding="lastName" id="lastName" placeholder="Last name" required="true"}}
+  <div class="control-group">
+    <label class="control-label" for="lastName">Last name</label>
+    <div class="controls">
+      {{view Ember.TextField valueBinding="lastName" id="lastName" placeholder="Last name" required="true"}}
+    </div>
   </div>
-</div>
-<div class="control-group">
-  <label class="control-label" for="email">Email</label>
-  <div class="controls">
-    {{view Ember.TextField valueBinding="email" id="email" type="email" placeholder="Email address"}}
+  <div class="control-group">
+    <label class="control-label" for="email">Email</label>
+    <div class="controls">
+      {{view Ember.TextField valueBinding="email" id="email" type="email" placeholder="Email address"}}
+    </div>
   </div>
-</div>
-<div class="control-group">
-  <label class="control-label" for="notes">Notes</label>
-  <div class="controls">
-    {{view Ember.TextArea valueBinding="notes" id="notes" placeholder="Notes"}}
+  <div class="control-group">
+    <label class="control-label" for="notes">Notes</label>
+    <div class="controls">
+      {{view Ember.TextArea valueBinding="notes" id="notes" placeholder="Notes"}}
+    </div>
   </div>
-</div>
 
-<div class="form-actions">
-  {{#if controller.id}}
-    {{submitButton "Update"}}
-  {{else}}
-    {{submitButton "Create"}}
-  {{/if}}
-  <button class="btn" {{action cancel content}}>Cancel</button>
-</div>
-
+  <div class="form-actions">
+    {{#if controller.id}}
+      {{submitButton "Update"}}
+    {{else}}
+      {{submitButton "Create"}}
+    {{/if}}
+    <button class="btn" {{action cancel content}}>Cancel</button>
+  </div>
+</form>

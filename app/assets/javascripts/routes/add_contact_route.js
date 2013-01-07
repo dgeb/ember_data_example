@@ -6,18 +6,22 @@ App.AddContactRoute = Ember.Route.extend({
     this.container.register('controller', 'addContact', App.EditContactController);
   },
 
-  setupController: function(controller, model) {
-    this._super(controller, model);
+  setupController: function(controller) {
+    // create a new record on a local transaction
+    this.transaction = controller.get('store').transaction();
+    var model = this.transaction.createRecord(App.Contact, {});
 
-    // notify the controller that editing has begun
-    controller.enterEditing();
+    controller.set('content', model);
   },
 
   exit: function() {
     this._super();
 
-    // notify the controller that editing has finished
-    this.controllerFor(this.templateName).exitEditing();
+    // rollback the local transaction if it hasn't already been cleared
+    if (this.transaction) {
+      this.transaction.rollback();
+      this.transaction = null;
+    }
   },
 
   renderTemplate: function() {
@@ -28,6 +32,18 @@ App.AddContactRoute = Ember.Route.extend({
   events: {
     cancel: function() {
       this.transitionTo('contactsIndex');
+    },
+
+    save: function(contact) {
+      // when creating new records, it's necessary to wait for the record to be assigned
+      // an id before we can transition to its route (which depends on its id)
+      contact.addObserver('id', this, function() {
+        this.transitionTo('contact', contact);
+      });
+
+      // commit and then clear the local transaction
+      this.transaction.commit();
+      this.transaction = null;
     }
   }
 });
