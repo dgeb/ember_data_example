@@ -1,22 +1,30 @@
 @import "twitter/bootstrap";
 
-#main {
-  margin-top: 60px;
+.navbar {
+  .brand a {
+    &:hover {
+      text-decoration: none;
+    }
+  }
 }
 
-.contact-details {
-  h2 img {
-    margin-right: 15px;
-    width: 80px;
-    height: 80px;
-  }
+#main {
+  margin-top: 60px;
 
-  dl.dl-horizontal {
-    dt {
+  .contact-details {
+    h2 img {
+      margin-right: 15px;
       width: 80px;
+      height: 80px;
     }
-    dd {
-      margin-left: 95px;
+
+    dl.dl-horizontal {
+      dt {
+        width: 80px;
+      }
+      dd {
+        margin-left: 95px;
+      }
     }
   }
 }
