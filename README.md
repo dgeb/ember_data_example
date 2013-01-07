@@ -18,6 +18,12 @@ Assuming Ruby 1.9.2+ with bundler gem installed:
     $ bundle exec rake db:migrate
     $ rails s
 
+## Test
+
+### Ember
+
+The [konacha](https://github.com/jfirebaugh/konacha) test framework is used for testing the Ember application. To invoke the tests from the command line, do a `bundle exec rake konacha:run`; To debug and run the tests in the browser, invoke `bundle exec rake konacha:serve` and navigate to [http://localhost:3500](http://localhost:3500).
+
 ## Contributions Welcome :)
 
 Please help improve this example by filing issues and pull requests!
