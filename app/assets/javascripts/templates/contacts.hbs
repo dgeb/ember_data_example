@@ -3,9 +3,7 @@
     <ul class="nav nav-list">
       <li class="nav-header">All contacts</li>
       {{#each contact in controller.arrangedContent}}
-        <li {{bindAttr class="contact.isActive:active"}}>
-          {{#linkTo "contact" contact}}{{contact.fullName}}{{/linkTo}}
-        </li>
+        {{view App.ContactInListView contentBinding="contact"}}
       {{/each}}
     </ul>
   </div>

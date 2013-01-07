@@ -1,8 +1,29 @@
 App.EditContactController = Em.ObjectController.extend({
   content: null,
   
+  enterEditing: function() {
+    // create a local transaction
+    this.transaction = this.get('store').transaction();
+    if (this.get('content.id')) {
+      // when editing records, add them to the local transaction
+      this.transaction.add(this.get('content'));
+    } else {
+      // create new records on the local transaction
+      this.set('content', this.transaction.createRecord(App.Contact, {}));
+    }
+  },
+
   exitEditing: function() {
-    this.get('transaction').rollback();
+    // rollback the local transaction (if it hasn't been cleared already)
+    if (this.transaction) {
+      this.transaction.rollback();
+      this.transaction = null;
+    }
+  },
+
+  cancelEditing: function() {
+    // NOTE: there's no need to rollback the transaction here (it will be done in
+    // `exitEditing`, which should be triggered when the Route exits)
     if(this.get('content.id'))
       this.get('target.router').transitionTo('contact', this.get('content'));
     else
@@ -10,7 +31,11 @@ App.EditContactController = Em.ObjectController.extend({
   },
 
   updateRecord: function() {
-    this.get('store').commit();
+    // TODO - validations
+
+    // commit and then clear the transaction (so exitEditing doesn't attempt a rollback)
+    this.transaction.commit();
+    this.transaction = null;
 
     if (this.get('content.isNew')) {
       // when creating new records, it's necessary to wait for the record to be assigned
