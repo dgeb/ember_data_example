@@ -23,5 +23,11 @@ App.AddContactRoute = Ember.Route.extend({
   renderTemplate: function() {
     // reuse the editContact template for adding contacts
     this.render('editContact');
+  },
+
+  events: {
+    cancel: function() {
+      this.transitionTo('contactsIndex');
+    }
   }
 });

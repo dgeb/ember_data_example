@@ -17,5 +17,11 @@ App.EditContactRoute = Ember.Route.extend({
 
     // no contact is active (momentarily, at least)
     this.controllerFor('contacts').set('activeContactId', null);
+  },
+
+  events: {
+    cancel: function(contact) {
+      this.transitionTo('contact', contact);
+    }
   }
 });

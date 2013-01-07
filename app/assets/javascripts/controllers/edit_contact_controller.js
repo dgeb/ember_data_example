@@ -21,15 +21,6 @@ App.EditContactController = Em.ObjectController.extend({
     }
   },
 
-  cancelEditing: function() {
-    // NOTE: there's no need to rollback the transaction here (it will be done in
-    // `exitEditing`, which should be triggered when the Route exits)
-    if(this.get('content.id'))
-      this.get('target.router').transitionTo('contact', this.get('content'));
-    else
-      this.get('target.router').transitionTo('contactsIndex');
-  },
-
   updateRecord: function() {
     // TODO - validations
 

@@ -1,5 +1,3 @@
-{{#with controller}}
-
 <legend>{{#if id}}Edit{{else}}Create{{/if}} Contact</legend>
 
 <div class="control-group">
@@ -27,14 +25,12 @@
   </div>
 </div>
 
-{{/with}}
-
 <div class="form-actions">
   {{#if controller.id}}
     {{submitButton "Update"}}
   {{else}}
     {{submitButton "Create"}}
   {{/if}}
-  <button class="btn" {{action cancelEditing}}>Cancel</button>
+  <button class="btn" {{action cancel content}}>Cancel</button>
 </div>
 
