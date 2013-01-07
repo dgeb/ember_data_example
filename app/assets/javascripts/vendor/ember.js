@@ -142,8 +142,8 @@ if ('undefined' !== typeof window) {
 
 })();
 
-// Version: v1.0.0-pre.2-305-g6904288
-// Last commit: 6904288 (2013-01-06 08:39:37 -0800)
+// Version: v1.0.0-pre.2-307-g8f60000
+// Last commit: 8f60000 (2013-01-06 15:12:15 -0800)
 
 
 (function() {
@@ -21201,7 +21201,7 @@ define("router",
 
         @param {String} url a URL to process
 
-        @returns {Array} an Array of `[handler, parameter]` tuples
+        @return {Array} an Array of `[handler, parameter]` tuples
       */
       handleURL: function(url) {
         var results = this.recognizer.recognize(url),
@@ -21245,7 +21245,7 @@ define("router",
 
         @param {String} handlerName
         @param {Array[Object]} contexts
-        @returns {Object} a serialized parameter hash
+        @return {Object} a serialized parameter hash
       */
       paramsForHandler: function(handlerName, callback) {
         var output = this._paramsForHandler(handlerName, [].slice.call(arguments, 1));
@@ -21260,7 +21260,7 @@ define("router",
           a URL for
         @param {...Object} objects a list of objects to serialize
 
-        @returns {String} a URL
+        @return {String} a URL
       */
       generate: function(handlerName) {
         var params = this.paramsForHandler.apply(this, arguments);
@@ -21517,6 +21517,10 @@ define("router",
         handler.context = context;
         if (handler.setup) { handler.setup(context); }
       });
+
+      if (router.didTransition) {
+        router.didTransition(handlerInfos);
+      }
     }
 
     /**
@@ -21598,7 +21602,7 @@ define("router",
       @param {Array[HandlerInfo]} newHandlers a list of the handler
         information for the new URL
 
-      @returns {Partition}
+      @return {Partition}
     */
     function partitionHandlers(oldHandlers, newHandlers) {
       var handlers = {
@@ -21727,7 +21731,8 @@ Ember.Router = Ember.Object.extend({
   startRouting: function() {
     var router = this.router,
         location = get(this, 'location'),
-        container = this.container;
+        container = this.container,
+        self = this;
 
     var lastURL;
 
@@ -21741,6 +21746,10 @@ Ember.Router = Ember.Object.extend({
       Ember.run.once(updateURL);
     };
 
+    router.didTransition = function(infos) {
+      self.didTransition(infos);
+    };
+
     container.register('view', 'default', DefaultView);
     container.register('view', 'toplevel', Ember.View.extend());
 
@@ -21748,6 +21757,17 @@ Ember.Router = Ember.Object.extend({
     location.onUpdateURL(function(url) {
       router.handleURL(url);
     });
+  },
+
+  didTransition: function(infos) {
+    var appController = this.container.lookup('controller:application'),
+        path = routePath(infos);
+
+    set(appController, 'currentPath', path);
+
+    if (get(this, 'namespace').LOG_TRANSITIONS) {
+      Ember.Logger.log("Transitioned into '" + path + "'");
+    }
   },
 
   handleURL: function(url) {
@@ -21822,6 +21842,16 @@ function handlerIsActive(router, handlerName) {
   }
 
   return false;
+}
+
+function routePath(handlerInfos) {
+  var path = [];
+
+  for (var i=1, l=handlerInfos.length; i<l; i++) {
+    path.push(handlerInfos[i].name);
+  }
+
+  return path.join(".");
 }
 
 Ember.Router.reopenClass({
@@ -22771,6 +22801,18 @@ Ember.onLoad('Ember.Handlebars', function(Handlebars) {
 var get = Ember.get;
 
 Ember.ControllerMixin.reopen({
+  concatenatedProperties: ['needs'],
+  needs: [],
+
+  init: function() {
+    this._super.apply(this, arguments);
+
+    // Structure asserts to still do verification but not string concat in production
+    if(!verifyDependencies(this)) {
+      Ember.assert("Missing dependencies", false);
+    }
+  },
+
   transitionTo: function() {
     var router = get(this, 'target');
 
@@ -22782,6 +22824,26 @@ Ember.ControllerMixin.reopen({
     return container.lookup('controller:' + controllerName);
   }
 });
+
+function verifyDependencies(controller) {
+  var needs = get(controller, 'needs'),
+      container = get(controller, 'container'),
+      dependency, satisfied = true;
+
+  for (var i=0, l=needs.length; i<l; i++) {
+    dependency = needs[i];
+    if (dependency.indexOf(':') === -1) {
+      dependency = "controller:" + dependency;
+    }
+
+    if (!container.has(dependency)) {
+      satisfied = false;
+      Ember.assert(this + " needs " + dependency + " but it does not exist", false);
+    }
+  }
+
+  return satisfied;
+}
 
 })();
 
@@ -25232,8 +25294,8 @@ Ember States
 
 
 })();
-// Version: v1.0.0-pre.2-305-g6904288
-// Last commit: 6904288 (2013-01-06 08:39:37 -0800)
+// Version: v1.0.0-pre.2-307-g8f60000
+// Last commit: 8f60000 (2013-01-06 15:12:15 -0800)
 
 
 (function() {
