@@ -1,9 +1,9 @@
 //= require spec_helper
-//= require routes/add_contact_route
+//= require routes/new_contact_route
 
-describe("App.AddContactRoute", function() {
+describe("App.NewContactRoute", function() {
   it("is an Ember.Route", function() {
-    assert.ok(App.AddContactRoute);
-    assert.ok(Ember.Route.detect(App.AddContactRoute));
+    assert.ok(App.NewContactRoute);
+    assert.ok(Ember.Route.detect(App.NewContactRoute));
   });
 });

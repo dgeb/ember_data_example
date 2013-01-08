@@ -1,9 +1,9 @@
-App.AddContactRoute = Ember.Route.extend({
+App.NewContactRoute = Ember.Route.extend({
   init: function() {
     this._super();
 
-    // reuse the EditContactController for adding contacts
-    this.container.register('controller', 'addContact', App.EditContactController);
+    // reuse the EditContactController for new contacts
+    this.container.register('controller', 'newContact', App.EditContactController);
   },
 
   setupController: function(controller) {
@@ -25,7 +25,7 @@ App.AddContactRoute = Ember.Route.extend({
   },
 
   renderTemplate: function() {
-    // reuse the editContact template for adding contacts
+    // reuse the editContact template for new contacts
     this.render('editContact');
   },
 
