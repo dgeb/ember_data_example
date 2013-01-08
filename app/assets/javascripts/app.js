@@ -8,4 +8,4 @@
 //= require ./router
 //= require_tree ./routes
 
-App = Em.Application.create();
+App = Em.Application.create({LOG_TRANSITIONS: true});
