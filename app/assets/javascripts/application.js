@@ -4,11 +4,11 @@
 // It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
 // the compiled file.
 //
-//= require vendor/jquery-1.8.2
-//= require vendor/handlebars
-//= require vendor/ember
-//= require vendor/ember-data
-//= require vendor/md5
+//= require jquery-1.8.2
+//= require handlebars
+//= require ember
+//= require ember-data
+//= require md5
 //= require jquery_ujs
 //= require_tree ./lib
 //= require app
