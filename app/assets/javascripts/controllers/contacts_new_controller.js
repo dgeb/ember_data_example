@@ -14,17 +14,18 @@ App.ContactsNewController = Em.ObjectController.extend({
   },
 
   save: function() {
-    // when creating new records, it's necessary to wait for the record to be assigned
-    // an id before we can transition to its route (which depends on its id)
-    var contact = this.get('content');
-    contact.addObserver('id', this, function() {
-      this.transitionTo('contact', contact);
-    });
-
     // commit and then clear the local transaction
     this.transaction.commit();
     this.transaction = null;
   },
+
+  transitionAfterSave: function() {
+    // when creating new records, it's necessary to wait for the record to be assigned
+    // an id before we can transition to its route (which depends on its id)
+    if (this.get('content.id')) {
+      this.transitionTo('contact', this.get('content'));
+    }
+  }.observes('content.id'),
 
   cancel: function() {
     this.stopEditing();
