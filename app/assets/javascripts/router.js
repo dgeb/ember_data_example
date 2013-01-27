@@ -1,9 +1,6 @@
-App.Router.map(function(match) {
-  match('/').to('index');
-  match('/contacts').to('contacts', function(match) {
-    match('/').to('contactsIndex');
-    match('/new').to('newContact');
-    match('/:contact_id').to('contact');
-    match('/:contact_id/edit').to('editContact');
+App.Router.map(function() {
+  this.resource('contacts', function() {
+    this.route('new');
+    this.resource('contact', {path: ':contact_id'});
   });
 });

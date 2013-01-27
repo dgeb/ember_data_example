@@ -1,0 +1,10 @@
+<form {{action save on="submit"}} class="form-horizontal">
+  <legend>Edit Contact</legend>
+
+  {{partial "contact_edit_fields"}}
+
+  <div class="form-actions">
+    {{submitButton "Update"}}
+    <button class="btn" {{action cancel}}>Cancel</button>
+  </div>
+</form>

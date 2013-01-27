@@ -1,7 +1,7 @@
 //= require spec_helper
 //= require models/contact
 
-describe("App.Contact", function() {
+describe("Models.App.Contact", function() {
   beforeEach(function(done) {
     defaultStore = DS.Store.create();
     done();

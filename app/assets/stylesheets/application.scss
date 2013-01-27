@@ -21,9 +21,22 @@
     dl.dl-horizontal {
       dt {
         width: 80px;
+        margin-bottom: 8px;
       }
       dd {
         margin-left: 95px;
+        margin-bottom: 8px;
+      }
+    }
+  }
+
+  form {
+    .phone-number {
+      margin-bottom: 8px;
+      white-space: nowrap;
+
+      input[type="text"] {
+        width: 105px;
       }
     }
   }

@@ -18,8 +18,8 @@ class ContactsController < ApplicationController
 
   # POST /contacts.json
   def create
-    contact = Contact.new(params[:contact])
-    if contact.save
+    contact = Contact.new
+    if update_contact(contact)
       render json: contact, status: :created
     else
       render json: contact.errors, status: :unprocessable_entity
@@ -29,8 +29,7 @@ class ContactsController < ApplicationController
   # PUT /contacts/1.json
   def update
     contact = Contact.find(params[:id])
-
-    if contact.update_attributes(params[:contact])
+    if update_contact(contact)
       render json: contact, status: :ok
     else
       render json: contact.errors, status: :unprocessable_entity
@@ -42,5 +41,42 @@ class ContactsController < ApplicationController
     contact = Contact.find(params[:id])
     contact.destroy
     render json: nil, status: :ok
+  end
+
+private
+
+  def permitted_params
+    params.require(:contact).permit(:first_name,
+                                    :last_name,
+                                    :email,
+                                    phone_numbers: [:id, :number])
+  end
+
+  def update_contact(contact)
+    contact_params = permitted_params
+    phone_numbers_param = contact_params.extract!(:phone_numbers)
+
+    Contact.transaction do
+      contact.attributes = contact_params
+      contact.save!
+
+      specified_phone_numbers = []
+      phone_numbers_param[:phone_numbers].each do |phone_number_params|
+        if phone_number_params[:id]
+          pn = contact.phone_numbers.find(phone_number_params[:id])
+          pn.update_attributes(phone_number_params)
+        else
+          pn = contact.phone_numbers.create(phone_number_params)
+        end
+        specified_phone_numbers << pn
+      end
+
+      contact.phone_numbers.each do |pn|
+        pn.destroy unless specified_phone_numbers.include?(pn)
+      end
+    end
+    return true
+  rescue
+    return false
   end
 end

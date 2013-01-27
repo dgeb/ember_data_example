@@ -2,7 +2,7 @@
   <div class="well sidebar-nav">
     <ul class="nav nav-list">
       <li class="nav-header">All contacts</li>
-      {{#each contact in controller.arrangedContent}}
+      {{#each contact in controller}}
         {{view App.ContactInListView contentBinding="contact"}}
       {{/each}}
     </ul>

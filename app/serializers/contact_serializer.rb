@@ -4,4 +4,6 @@ class ContactSerializer < ActiveModel::Serializer
              :last_name,
              :email,
              :notes
+
+  has_many :phone_numbers, embed: :objects
 end
