@@ -33,10 +33,10 @@ App.ContactsNewController = Em.ObjectController.extend({
   },
 
   addPhoneNumber: function() {
-    this.get('content.phoneNumbers').createRecord({}, this.transaction);
+    this.get('content.phoneNumbers').createRecord();
   },
 
   removePhoneNumber: function(phoneNumber) {
-    this.get('content.phoneNumbers').removeObject(phoneNumber);
+    phoneNumber.deleteRecord();
   }
 });

@@ -1,3 +1,3 @@
 class PhoneNumberSerializer < ActiveModel::Serializer
-  attributes :id, :number
+  attributes :id, :number, :contact_id
 end
