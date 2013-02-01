@@ -1,9 +1,9 @@
 //= require spec_helper
-//= require controllers/edit_contact_controller
+//= require controllers/contact_edit_controller
 
-describe("App.EditContactController", function() {
+describe("App.ContactEditController", function() {
   it("is an Ember.ObjectController", function() {
-    assert.ok(App.EditContactController);
-    assert.ok(Ember.ObjectController.detect(App.EditContactController));
+    assert.ok(App.ContactEditController);
+    assert.ok(Ember.ObjectController.detect(App.ContactEditController));
   });
 });
