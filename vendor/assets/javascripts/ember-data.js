@@ -6481,6 +6481,7 @@ DS.JSONSerializer = DS.Serializer.extend({
   },
 
   sideloadRelationships: function(loader, type, json, prop, loaded) {
+    if (loaded[prop]) { return; }
     loaded[prop] = true;
 
     get(type, 'relationshipsByName').forEach(function(key, meta) {
@@ -6488,7 +6489,7 @@ DS.JSONSerializer = DS.Serializer.extend({
       if (meta.kind === 'belongsTo') {
         key = this.pluralize(key);
       }
-      if (json[key] && !loaded[key]) {
+      if (json[key]) {
         this.sideloadRelationships(loader, meta.type, json, key, loaded);
       }
     }, this);
