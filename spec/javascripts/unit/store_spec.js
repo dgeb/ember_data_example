@@ -23,8 +23,8 @@ describe("App.Store", function() {
     it("is a DS.RESTAdapter", function() {
       assert.ok(DS.RESTAdapter.detectInstance(store.get('adapter')));
     });
-    it("has a namespace 'api'", function() {
-      assert.ok(store.get('adapter.namespace'), 'api');
-    });
+    //it("has a namespace 'api'", function() {
+    //  assert.ok(store.get('adapter.namespace'), 'api');
+    //});
   });
 });
