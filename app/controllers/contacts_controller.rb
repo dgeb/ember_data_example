@@ -56,10 +56,14 @@ private
     contact_params = permitted_params
     phone_numbers_param = contact_params.extract!(:phone_numbers)
 
+    # Because updates to the contact and its associations should be atomic,
+    # wrap them in a transaction.
     Contact.transaction do
+      # Update the contact's own attributes first.
       contact.attributes = contact_params
       contact.save!
 
+      # Update the contact's phone numbers, creating/destroying as appropriate.
       specified_phone_numbers = []
       phone_numbers_param[:phone_numbers].each do |phone_number_params|
         if phone_number_params[:id]
@@ -70,11 +74,15 @@ private
         end
         specified_phone_numbers << pn
       end
-
       contact.phone_numbers.each do |pn|
         pn.destroy unless specified_phone_numbers.include?(pn)
       end
     end
+
+    # Important! Reload the contact to ensure that changes to its associations
+    # (i.e. phone numbers) will be serialized correctly.
+    contact.reload
+
     return true
   rescue
     return false
