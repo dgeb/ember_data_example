@@ -1,9 +1,11 @@
-# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+dan:
+  first_name: Dan
+  last_name: Gebhardt
+  email: dan@example.com
+  notes: Writes sample code without tests :/
 
-one:
-  first_name: MyString
-  last_name: MyString
-
-two:
-  first_name: MyString
-  last_name: MyString
+joe:
+  first_name: Joe
+  last_name: Blow
+  email: joe@example.com
+  notes: Lousy plumber

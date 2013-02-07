@@ -18,12 +18,14 @@ gem 'jquery-rails'
 gem 'barber', git: 'git://github.com/tchak/barber.git'
 gem 'ember-rails', github: 'emberjs/ember-rails'
 
-group :test do
-  # Pretty printed test output
-  gem 'turn', '~> 0.8.3', require: false
-end
-
 group :test, :development do
+  gem 'minitest'
+  gem 'minitest-rails'
   gem 'konacha'
   gem 'poltergeist'
+end
+
+group :test do
+  # Pretty printed test output
+  gem 'turn', '~> 0.8.3'
 end

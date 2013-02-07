@@ -55,6 +55,8 @@ private
   def update_contact(contact)
     contact_params = permitted_params
     phone_numbers_param = contact_params.extract!(:phone_numbers)
+    phone_numbers_param = phone_numbers_param[:phone_numbers]
+    phone_numbers_param ||= []
 
     # Because updates to the contact and its associations should be atomic,
     # wrap them in a transaction.
@@ -65,7 +67,7 @@ private
 
       # Update the contact's phone numbers, creating/destroying as appropriate.
       specified_phone_numbers = []
-      phone_numbers_param[:phone_numbers].each do |phone_number_params|
+      phone_numbers_param.each do |phone_number_params|
         if phone_number_params[:id]
           pn = contact.phone_numbers.find(phone_number_params[:id])
           pn.update_attributes(phone_number_params)
