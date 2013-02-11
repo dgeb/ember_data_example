@@ -1,13 +1,7 @@
 class ContactsController < ApplicationController
-  # GET /contacts
   # GET /contacts.json
   def index
-    contacts = Contact.all
-
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render json: contacts }
-    end
+    render json: Contact.all
   end
 
   # GET /contacts/1.json
