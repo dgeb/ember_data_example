@@ -43,6 +43,7 @@ private
     params.require(:contact).permit(:first_name,
                                     :last_name,
                                     :email,
+                                    :notes,
                                     phone_numbers: [:id, :number])
   end
 
