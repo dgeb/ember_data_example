@@ -23,13 +23,13 @@ App.ContactsNewController = Em.ObjectController.extend({
     // when creating new records, it's necessary to wait for the record to be assigned
     // an id before we can transition to its route (which depends on its id)
     if (this.get('content.id')) {
-      this.transitionTo('contact', this.get('content'));
+      this.transitionToRoute('contact', this.get('content'));
     }
   }.observes('content.id'),
 
   cancel: function() {
     this.stopEditing();
-    this.transitionTo('contacts.index');
+    this.transitionToRoute('contacts.index');
   },
 
   addPhoneNumber: function() {
