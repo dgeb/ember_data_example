@@ -1,4 +1,6 @@
 App.ContactEditController = Em.ObjectController.extend({
+  needs: ['contact'],
+
   startEditing: function() {
     // add the contact and its associated phone numbers to a local transaction
     var contact = this.get('content');
@@ -22,11 +24,11 @@ App.ContactEditController = Em.ObjectController.extend({
   save: function() {
     this.transaction.commit();
     this.transaction = undefined;
-    this.controllerFor('contact').stopEditing();
+    this.get('controllers.contact').stopEditing();
   },
 
   cancel: function() {
-    this.controllerFor('contact').stopEditing();
+    this.get('controllers.contact').stopEditing();
   },
 
   addPhoneNumber: function() {

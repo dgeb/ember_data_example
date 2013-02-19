@@ -1,15 +1,16 @@
 App.ContactController = Em.ObjectController.extend({
   isEditing: false,
+  needs: ['contactEdit'],
 
   startEditing: function() {
-    var contactEditController = this.controllerFor('contactEdit');
+    var contactEditController = this.get('controllers.contactEdit');
     contactEditController.set('content', this.get('content'));
     contactEditController.startEditing();
     this.set('isEditing', true);
   },
 
   stopEditing: function() {
-    var contactEditController = this.controllerFor('contactEdit');
+    var contactEditController = this.get('controllers.contactEdit');
     contactEditController.stopEditing();
     this.set('isEditing', false);
   },
