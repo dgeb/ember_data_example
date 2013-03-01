@@ -1,7 +1,7 @@
 App.ContactRoute = Ember.Route.extend({
   setupController: function(controller, model) {
     // reset editing state
-    // note: this is necessary here because `exit` won't be called when transitioning
+    // note: this is necessary here because `deactivate` won't be called when transitioning
     //       from one ContactRoute directly into another
     if (controller.get('isEditing')) {
       controller.stopEditing();
@@ -11,8 +11,7 @@ App.ContactRoute = Ember.Route.extend({
     this.controllerFor('contacts').set('activeContactId', model.get('id'));
   },
 
-  exit: function() {
-    this._super();
+  deactivate: function() {
     var controller = this.controllerFor('contact');
 
     // reset editing state

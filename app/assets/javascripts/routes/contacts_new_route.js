@@ -9,8 +9,7 @@ App.ContactsNewRoute = Ember.Route.extend({
     controller.startEditing();
   },
 
-  exit: function() {
-    this._super();
+  deactivate: function() {
     this.controllerFor('contacts.new').stopEditing();
   }
 });
