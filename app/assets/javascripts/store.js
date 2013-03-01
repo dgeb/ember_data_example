@@ -1,16 +1,9 @@
-App.RESTSerializer = DS.RESTSerializer.extend({
-  init: function() {
-    this._super();
-
-    this.map('App.Contact', {
-      phoneNumbers: {embedded: 'always'}
-    });
-  }
+App.Adapter = DS.RESTAdapter.extend({
+  bulkCommit: false
 });
 
-App.Adapter = DS.RESTAdapter.extend({
-  bulkCommit: false,
-  serializer: App.RESTSerializer.create()
+App.Adapter.map('App.Contact', {
+  phoneNumbers: {embedded: 'always'}
 });
 
 App.Store = DS.Store.extend({
