@@ -25,6 +25,17 @@ MiniTest::Unit is used for testing the Rails application. To invoke tests:
 
     $ bundle exec rake test
 
+### Integration
+
+Capybara is used for integration testing. By default, the `poltergeist` driver is used, although `selenium` could be used as well.
+To change drivers, update the following line in `test_helper.rb`:
+
+    Capybara.default_driver = :selenium
+
+Integration tests are performed by default when running `bundle exec rake test`. You can *just* run integration tests with:
+
+    $ bundle exec rake test:integration
+
 ### Ember
 
 The [konacha](https://github.com/jfirebaugh/konacha) test framework is used for testing the Ember application.
