@@ -11,7 +11,9 @@ require "minitest/rails/capybara"
 # Uncomment if you want awesome colorful output
 # require "minitest/pride"
 
-Capybara.default_driver = :selenium
+# Either selenium or poltergeist can be used with Capybara
+#Capybara.default_driver = :selenium
+Capybara.default_driver = :poltergeist
 
 class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in alphabetical order.
