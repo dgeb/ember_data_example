@@ -21,6 +21,8 @@ gem 'ember-rails', github: 'emberjs/ember-rails'
 group :test, :development do
   gem 'minitest'
   gem 'minitest-rails'
+  gem 'minitest-rails-capybara'
+  gem 'capybara'
   gem 'konacha'
   gem 'poltergeist'
 end
