@@ -1,10 +1,10 @@
-// Last commit: 8801f2e (2013-02-15 13:53:27 -0800)
+// Last commit: 9dfdcc8 (2013-03-04 13:29:27 -0800)
 
 
 (function() {
 window.DS = Ember.Namespace.create({
-  // this one goes to 11
-  CURRENT_API_REVISION: 11
+  // this one goes past 11
+  CURRENT_API_REVISION: 12
 });
 
 })();
@@ -151,7 +151,7 @@ DS.AdapterPopulatedRecordArray = DS.RecordArray.extend({
     set(this, 'isLoaded', true);
     this.endPropertyChanges();
 
-    var self = this;
+    var self = this; 
     // TODO: does triggering didLoad event should be the last action of the runLoop?
     Ember.run.once(function() {
       self.trigger('didLoad');
@@ -849,7 +849,7 @@ DS._Mappable = Ember.Mixin.create({
 
       instanceMap.set(transformedKey, newValue);
     }
-  },
+  }
 
 
 });
@@ -2521,7 +2521,7 @@ DS.Store = Ember.Object.extend(DS._Mappable, {
 
     this.recordCache[clientId] = record = type._create({
       store: this,
-      clientId: clientId,
+      clientId: clientId
     });
 
     set(record, 'id', id);
@@ -3836,6 +3836,7 @@ var storeAlias = function(methodName) {
         args = [].slice.call(arguments);
 
     args.unshift(this);
+    Ember.assert("Your application does not have a 'Store' property defined. Attempts to call '" + methodName + "' on model classes will fail. Please provide one as with 'YourAppName.Store = DS.Store.extend()'", !!store);
     return store[methodName].apply(store, args);
   };
 };
@@ -4181,7 +4182,6 @@ DS.Model.reopenClass({
         App.Blog = DS.Model.extend({
           users: DS.hasMany(App.User),
           owner: DS.belongsTo(App.User),
-
           posts: DS.hasMany(App.Post)
         });
 
@@ -4255,6 +4255,51 @@ DS.Model.reopenClass({
     });
 
     return names;
+  }),
+
+  /**
+    An array of types directly related to a model. Each type will be
+    included once, regardless of the number of relationships it has with
+    the model.
+
+    For example, given a model with this definition:
+
+        App.Blog = DS.Model.extend({
+          users: DS.hasMany(App.User),
+          owner: DS.belongsTo(App.User),
+          posts: DS.hasMany(App.Post)
+        });
+
+    This property would contain the following:
+
+       var relatedTypes = Ember.get(App.Blog, 'relatedTypes');
+       //=> [ App.User, App.Post ]
+
+    @type Ember.Array
+    @readOnly
+  */
+  relatedTypes: Ember.computed(function() {
+    var type,
+        types = Ember.A([]);
+
+    // Loop through each computed property on the class,
+    // and create an array of the unique types involved
+    // in relationships
+    this.eachComputedProperty(function(name, meta) {
+      if (meta.isRelationship) {
+        type = meta.type;
+
+        if (typeof type === 'string') {
+          type = get(this, type, false) || get(Ember.lookup, type);
+        }
+
+        if (!types.contains(type)) {
+          types.push(type);
+        }
+      }
+    });
+
+    return types;
   }),
 
   /**
@@ -4357,6 +4402,21 @@ DS.Model.reopenClass({
   eachRelationship: function(callback, binding) {
     get(this, 'relationshipsByName').forEach(function(name, relationship) {
       callback.call(binding, name, relationship);
+    });
+  },
+
+  /**
+    Given a callback, iterates over each of the types related to a model,
+    invoking the callback with the related type's class. Each type will be
+    returned just once, regardless of how many different relationships it has
+    with a model.
+
+    @param {Function} callback the callback to invoke
+    @param {any} binding the value to which the callback's `this` should be bound
+  */
+  eachRelatedType: function(callback, binding) {
+    get(this, 'relatedTypes').forEach(function(type) {
+      callback.call(binding, type);
     });
   }
 });
@@ -4508,12 +4568,12 @@ DS.RelationshipChange.determineRelationshipType = function(recordType, knownSide
 
   if(options.inverse){
     key = options.inverse;
-    otherContainerType = get(otherType, 'relationshipsByName').get(key).kind;
-  }
+    otherContainerType = get(otherType, 'relationshipsByName').get(key).kind; 
+  } 
   else if(assoc = DS._inverseRelationshipFor(otherType, recordType)){
     key = assoc.name;
     otherContainerType = assoc.kind;
-  }
+  } 
   if(!key){
     return knownContainerType === "belongsTo" ? "oneToNone" : "manyToNone";
   }
@@ -4524,8 +4584,8 @@ DS.RelationshipChange.determineRelationshipType = function(recordType, knownSide
     else{
       return knownContainerType === "belongsTo" ? "oneToMany" : "manyToMany";
     }
-  }
-
+  } 
+ 
 };
 
 DS.RelationshipChange.createChange = function(firstRecordReference, secondRecordReference, store, options){
@@ -4933,7 +4993,9 @@ DS.RelationshipChangeRemove.prototype.sync = function() {
 
   if (secondRecord && firstRecord) {
     if(this.secondRecordKind === "belongsTo"){
+      secondRecord.suspendRelationshipObservers(function(){
         set(secondRecord, secondRecordName, null);
+      });
      }
      else if(this.secondRecordKind === "hasMany"){
        secondRecord.suspendRelationshipObservers(function(){
@@ -5621,7 +5683,7 @@ DS.Serializer = Ember.Object.extend({
       primaryKey: function(type) {
         // If the type is `BlogPost`, this will return
         // `blog_post_id`.
-        var typeString = type.toString.split(".")[1].underscore();
+        var typeString = type.toString().split(".")[1].underscore();
         return typeString + "_id";
       }
     });
@@ -6296,6 +6358,13 @@ DS.JSONSerializer = DS.Serializer.extend({
 
     if (sideloadAs) {
       this.sideloadMapping.set(sideloadAs, type);
+
+      // Set a flag indicating that mappings may need to be normalized
+      // (i.e. converted from strings -> types) before sideloading.
+      // We can't do this conversion immediately here, because `configure`
+      // may be called before certain types have been defined.
+      this.sideloadMapping.normalized = false;
+
       delete configuration.sideloadAs;
     }
 
@@ -6457,47 +6526,88 @@ DS.JSONSerializer = DS.Serializer.extend({
     }
   },
 
-  sideload: function(loader, type, json, root) {
-    var sideloadedType, mappings, loaded = {};
+  /**
+    @private
 
-    loaded[root] = true;
+    Iterates over the `json` payload and attempts to load any data
+    included alongside `root`.
+
+    The keys expected for sideloaded data are based upon the types related
+    to the root model. Recursion is used to ensure that types related to
+    related types can be loaded as well. Any custom keys specified by
+    `sideloadAs` mappings will also be respected.
+
+    @param {DS.Store subclass} loader
+    @param {DS.Model subclass} type
+    @param {Object} json
+    @param {String} root
+  */
+  sideload: function(loader, type, json, root) {
+    var sideloadedType;
+
+    this.normalizeSideloadMappings();
+    this.configureSideloadMappingForType(type);
 
     for (var prop in json) {
-      if (!json.hasOwnProperty(prop)) { continue; }
-      if (prop === root) { continue; }
-      if (prop === this.configOption(type, 'meta')) { continue; }
-
-      sideloadedType = type.typeForRelationship(prop);
-
-      if (!sideloadedType) {
-        sideloadedType = this.sideloadMapping.get(prop);
-
-        if (typeof sideloadedType === 'string') {
-          sideloadedType = get(Ember.lookup, sideloadedType);
-        }
-
-        Ember.assert("Your server returned a hash with the key " + prop + " but you have no mapping for it", !!sideloadedType);
+      if (!json.hasOwnProperty(prop) ||
+          prop === root ||
+          prop === this.configOption(type, 'meta')) {
+        continue;
       }
 
-      this.sideloadRelationships(loader, sideloadedType, json, prop, loaded);
+      sideloadedType = this.sideloadMapping.get(prop);
+      Ember.assert("Your server returned a hash with the key " + prop +
+                   " but you have no mapping for it",
+                   !!sideloadedType);
+
+      this.loadValue(loader, sideloadedType, json[prop]);
     }
   },
 
-  sideloadRelationships: function(loader, type, json, prop, loaded) {
-    if (loaded[prop]) { return; }
-    loaded[prop] = true;
+  /**
+    @private
 
-    get(type, 'relationshipsByName').forEach(function(key, meta) {
-      key = meta.key || key;
-      if (meta.kind === 'belongsTo') {
-        key = this.pluralize(key);
-      }
-      if (json[key]) {
-        this.sideloadRelationships(loader, meta.type, json, key, loaded);
+    Iterates over all the `sideloadAs` mappings and converts any that are
+    strings to their equivalent types.
+
+    This is an optimization used to avoid performing lookups for every
+    call to `sideload`.
+  */
+  normalizeSideloadMappings: function() {
+    if (! this.sideloadMapping.normalized) {
+      this.sideloadMapping.forEach(function(key, value) {
+        if (typeof value === 'string') {
+          this.sideloadMapping.set(key, get(Ember.lookup, value));
+        }
+      });
+      this.sideloadMapping.normalized = true;
+    }
+  },
+
+  /**
+    @private
+
+    Configures possible sideload mappings for the types related to a
+    particular model. This recursive method ensures that sideloading
+    works for related models as well.
+
+    @param {DS.Model subclass} type
+    @param {Ember.A} configured an array of types that have already been configured
+  */
+  configureSideloadMappingForType: function(type, configured) {
+    if (!configured) {configured = Ember.A([]);}
+    configured.pushObject(type);
+
+    type.eachRelatedType(function(relatedType) {
+      if (!configured.contains(relatedType)) {
+        var root = this.sideloadMappingForType(relatedType);
+        if (!root) {
+          root = this.defaultSideloadRootForType(relatedType);
+          this.sideloadMapping.set(root, relatedType);
+        }
+        this.configureSideloadMappingForType(relatedType, configured);
       }
     }, this);
-
-    this.loadValue(loader, type, json[prop]);
   },
 
   loadValue: function(loader, type, value) {
@@ -6537,6 +6647,18 @@ DS.JSONSerializer = DS.Serializer.extend({
     }
   },
 
+  /**
+    @private
+
+    Determines the singular root name for a particular type.
+
+    This is an underscored, lowercase version of the model name.
+    For example, the type `App.UserGroup` will have the root
+    `user_group`.
+
+    @param {DS.Model subclass} type
+    @returns {String} name of the root element
+  */
   rootForType: function(type) {
     var typeString = type.toString();
 
@@ -6546,6 +6668,34 @@ DS.JSONSerializer = DS.Serializer.extend({
     var parts = typeString.split(".");
     var name = parts[parts.length - 1];
     return name.replace(/([A-Z])/g, '_$1').toLowerCase().slice(1);
+  },
+
+  /**
+    @private
+
+    Determines the root name mapped to a particular sideloaded type.
+
+    @param {DS.Model subclass} type
+    @returns {String} name of the root element, if any is registered
+  */
+  sideloadMappingForType: function(type) {
+    this.sideloadMapping.forEach(function(key, value) {
+      if (type === value) {
+        return key;
+      }
+    });
+  },
+
+  /**
+    @private
+
+    The default root name for a particular sideloaded type.
+
+    @param {DS.Model subclass} type
+    @returns {String} name of the root element
+  */
+  defaultSideloadRootForType: function(type) {
+    return this.pluralize(this.rootForType(type));
   }
 });
 
@@ -6675,7 +6825,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
         occupations: [{
           id: 345,
           title: "Tricycle Mechanic"
-        }]
+        }]    
       });
     ```
 
@@ -6705,12 +6855,12 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     For example, the `RESTAdapter` saves newly created records by
     making an Ajax request. When the server returns, the adapter
     calls didCreateRecord. If the server returns a response body,
-    it is passed as the payload.
+    it is passed as the payload. 
 
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} record
-    @param {any} payload
+    @param {any} payload 
   */
   didCreateRecord: function(store, type, record, payload) {
     store.didSaveRecord(record);
@@ -6732,7 +6882,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     Acknowledges that the adapter has finished creating several records.
 
     Your adapter should call this method from `createRecords` when it
-    has saved multiple created records to its persistent storage
+    has saved multiple created records to its persistent storage 
     received an acknowledgement.
 
     If the persistent storage returns a new payload in response to the
@@ -6742,7 +6892,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} record
-    @param {any} payload
+    @param {any} payload 
   */
   didCreateRecords: function(store, type, records, payload) {
     records.forEach(function(record) {
@@ -6771,7 +6921,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} record
-    @param {any} payload
+    @param {any} payload 
   */
   didSaveRecord: function(store, type, record, payload) {
     store.didSaveRecord(record);
@@ -6804,7 +6954,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} record
-    @param {any} payload
+    @param {any} payload 
   */
   didUpdateRecord: function() {
     this.didSaveRecord.apply(this, arguments);
@@ -6823,14 +6973,14 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} record
-    @param {any} payload
+    @param {any} payload 
   */
   didDeleteRecord: function() {
     this.didSaveRecord.apply(this, arguments);
   },
 
   /**
-    Acknowledges that the adapter has finished updating or deleting
+    Acknowledges that the adapter has finished updating or deleting 
     multiple records.
 
     Your adapter should call this method from its `updateRecords` or
@@ -6843,7 +6993,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} records
-    @param {any} payload
+    @param {any} payload 
   */
   didSaveRecords: function(store, type, records, payload) {
     records.forEach(function(record) {
@@ -6869,7 +7019,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} records
-    @param {any} payload
+    @param {any} payload 
   */
   didUpdateRecords: function() {
     this.didSaveRecords.apply(this, arguments);
@@ -6888,7 +7038,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     @param {DS.Store} store
     @param {subclass of DS.Model} type
     @param {DS.Model} records
-    @param {any} payload
+    @param {any} payload 
   */
   didDeleteRecords: function() {
     this.didSaveRecords.apply(this, arguments);
@@ -6906,7 +7056,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
 
     @param {DS.Store} store
     @param {subclass of DS.Model} type
-    @param {any} payload
+    @param {any} payload 
     @param {String} id
   */
   didFindRecord: function(store, type, payload, id) {
@@ -6930,7 +7080,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
 
     @param {DS.Store} store
     @param {subclass of DS.Model} type
-    @param {any} payload
+    @param {any} payload 
   */
   didFindAll: function(store, type, payload) {
     var loader = DS.loaderFor(store),
@@ -6949,7 +7099,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
 
     @param {DS.Store} store
     @param {subclass of DS.Model} type
-    @param {any} payload
+    @param {any} payload 
     @param {DS.AdapterPopulatedRecordArray} recordArray
   */
   didFindQuery: function(store, type, payload, recordArray) {
@@ -6970,7 +7120,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
 
     @param {DS.Store} store
     @param {subclass of DS.Model} type
-    @param {any} payload
+    @param {any} payload 
   */
   didFindMany: function(store, type, payload) {
     var loader = DS.loaderFor(store);
@@ -7094,7 +7244,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
   },
 
   /**
-    A public method that allows you to register an enumerated
+    A public method that allows you to register an enumerated 
     type on your adapter.  This is useful if you want to utilize
     a text representation of an integer value.
 
@@ -7106,7 +7256,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
 
     You would then refer to the 'priority' DS.attr in your model:
     App.Task = DS.Model.extend({
-      priority: DS.attr('priority')
+      priority: DS.attr('priority') 
     });
 
     And lastly, you would set/get the text representation on your model instance,
@@ -7116,7 +7266,7 @@ DS.Adapter = Ember.Object.extend(DS._Mappable, {
     Server Response / Load:  { myTask: {priority: 0} }
 
     @param {String} type of the transform
-    @param {Array} array of String objects to use for the enumerated values.
+    @param {Array} array of String objects to use for the enumerated values.  
       This is an ordered list and the index values will be used for the transform.
   */
   registerEnumTransform: function(attributeType, objects) {
@@ -7383,7 +7533,7 @@ DS.FixtureAdapter = DS.Adapter.extend({
     Implement this method in order to query fixtures data
   */
   queryFixtures: function(fixtures, query, type) {
-    return fixtures;
+    Ember.assert('Not implemented: You must override the DS.FixtureAdapter::queryFixtures method to support querying the fixture store.');
   },
 
   /*
@@ -7404,7 +7554,7 @@ DS.FixtureAdapter = DS.Adapter.extend({
     var fixtures = this.fixturesForType(type),
         fixture;
 
-    Ember.assert("Unable to find fixtures for model type "+type.toString(), !!fixtures);
+    Ember.warn("Unable to find fixtures for model type " + type.toString(), fixtures);
 
     if (fixtures) {
       fixture = Ember.A(fixtures).findProperty('id', id);
@@ -7487,14 +7637,12 @@ DS.FixtureAdapter = DS.Adapter.extend({
     @private
   */
   simulateRemoteCall: function(callback, context) {
-    function response() {
-      Ember.run(context, callback);
-    }
-
     if (get(this, 'simulateRemoteResponse')) {
-      setTimeout(response, get(this, 'latency'));
+      // Schedule with setTimeout
+      Ember.run.later(context, callback, get(this, 'latency'));
     } else {
-      response();
+      // Asynchronous, but at the of the runloop with zero latency
+      Ember.run.once(context, callback);
     }
   }
 });
