@@ -14,8 +14,6 @@ end
 
 gem 'active_model_serializers', github: 'rails-api/active_model_serializers'
 gem 'jquery-rails'
-# barber included because of https://github.com/emberjs/ember.js/issues/1827#issuecomment-12610866
-gem 'barber', git: 'git://github.com/tchak/barber.git'
 gem 'ember-rails', github: 'emberjs/ember-rails'
 
 group :test, :development do
