@@ -10,6 +10,7 @@ group :assets do
   gem 'sass-rails'
   gem 'uglifier'
   gem 'anjlab-bootstrap-rails', '>= 2.1', :require => 'bootstrap-rails'
+  gem 'therubyracer', :platforms => :ruby
 end
 
 gem 'active_model_serializers', github: 'rails-api/active_model_serializers'
