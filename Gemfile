@@ -23,6 +23,7 @@ group :test, :development do
   gem 'capybara'
   gem 'konacha'
   gem 'poltergeist'
+  gem 'therubyracer'
 end
 
 group :test do
