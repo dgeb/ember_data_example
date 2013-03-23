@@ -2,20 +2,13 @@
 //= require store
 
 describe("App.Store", function() {
-  beforeEach(function(done) {
-    store = App.Store.create();
-    done();
-  });
-  afterEach(function() {
-    store.destroy();
+  var store;
+
+  beforeEach(function() {
+    store = lookupStore();
   });
 
-  it("is a DS.Store", function() {
-    assert.ok(App.Store);
-    assert.ok(DS.Store.detect(App.Store));
-  });
-
-  it("works with latest Ember-Data revision 12", function() {
+  it("works with latest Ember-Data revision", function() {
     assert.equal(store.get('revision'), 12);
   });
 
@@ -23,8 +16,5 @@ describe("App.Store", function() {
     it("is a DS.RESTAdapter", function() {
       assert.ok(DS.RESTAdapter.detectInstance(store.get('adapter')));
     });
-    //it("has a namespace 'api'", function() {
-    //  assert.ok(store.get('adapter.namespace'), 'api');
-    //});
   });
 });

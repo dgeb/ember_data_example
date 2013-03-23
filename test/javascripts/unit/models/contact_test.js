@@ -1,13 +1,10 @@
 //= require test_helper
-//= require models/contact
 
 describe("Models.App.Contact", function() {
-  beforeEach(function(done) {
-    defaultStore = DS.Store.create();
-    done();
-  });
-  afterEach(function() {
-    defaultStore.destroy();
+  var store;
+
+  beforeEach(function() {
+    store = lookupStore();
   });
 
   it("is a DS.Model", function() {
@@ -18,16 +15,15 @@ describe("Models.App.Contact", function() {
   describe("fullName", function() {
     it("concatenates 'firstName' and 'lastName'", function() {
       var contact = App.Contact.createRecord({
-        firstName: 'Dan',
-        lastName: 'Gebhardt'
+        firstName: 'Joe',
+        lastName: 'Blow'
       });
-
-      assert.equal(contact.get('fullName'), 'Dan Gebhardt');
+      assert.equal(contact.get('fullName'), 'Joe Blow');
     });
 
     it("is '(No Name)' if an existing record has neither firstName nor lastName", function() {
-      defaultStore.load(App.Contact, { id: 1 });
-      var contact = defaultStore.find(App.Contact, 1);
+      store.load(App.Contact, {id: 1});
+      var contact = App.Contact.find(1);
       assert.equal(contact.get('fullName'), '(No Name)');
     });
 
@@ -39,12 +35,13 @@ describe("Models.App.Contact", function() {
 
   describe("gravatar", function() {
     it("uses the correct gravatar url", function() {
-      var emailMd5 = MD5('dan@mailinator.com');
+      var emailMd5 = MD5('joe.blow@example.com');
       var contact = App.Contact.createRecord({
-        email: 'dan@mailinator.com'
+        email: 'joe.blow@example.com'
       });
       assert.equal(contact.get('gravatar'), "http://www.gravatar.com/avatar/" + emailMd5);
     });
+
     it("uses an empty string if no email is provided", function() {
       var emailMd5 = MD5('');
       var contact = App.Contact.createRecord();
