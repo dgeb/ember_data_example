@@ -1,4 +1,4 @@
-//= require spec_helper
+//= require test_helper
 //= require controllers/contacts_controller
 
 describe("App.ContactsController", function() {

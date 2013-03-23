@@ -1,7 +1,7 @@
-//= require spec_helper
+//= require test_helper
 //= require helpers/forms
 
-describe("Handlerbars", function() {
+describe("Handlebars", function() {
   var view;
   var appendView = function(view) {
     Ember.run(function() {

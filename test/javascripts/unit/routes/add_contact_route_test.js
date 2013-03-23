@@ -1,4 +1,4 @@
-//= require spec_helper
+//= require test_helper
 //= require routes/contacts_new_route
 
 describe("App.ContactsNewRoute", function() {

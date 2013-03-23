@@ -1,4 +1,4 @@
-//= require spec_helper
+//= require test_helper
 //= require models/contact
 
 describe("Models.App.Contact", function() {

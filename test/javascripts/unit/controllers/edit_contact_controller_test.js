@@ -1,4 +1,4 @@
-//= require spec_helper
+//= require test_helper
 //= require controllers/contact_edit_controller
 
 describe("App.ContactEditController", function() {

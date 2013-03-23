@@ -1,6 +1,6 @@
 //= require konacha_config
 
-//= require jquery-1.8.2
+//= require jquery
 //= require handlebars
 //= require ember
 //= require ember-data

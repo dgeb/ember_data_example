@@ -1,4 +1,4 @@
-//= require spec_helper
+//= require test_helper
 //= require router
 
 describe("App.Router", function() {

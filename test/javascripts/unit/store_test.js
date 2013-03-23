@@ -1,4 +1,4 @@
-//= require spec_helper
+//= require test_helper
 //= require store
 
 describe("App.Store", function() {
@@ -15,8 +15,8 @@ describe("App.Store", function() {
     assert.ok(DS.Store.detect(App.Store));
   });
 
-  it("works with latest Ember-Data revision 11", function() {
-    assert.equal(store.get('revision'), 11);
+  it("works with latest Ember-Data revision 12", function() {
+    assert.equal(store.get('revision'), 12);
   });
 
   describe("adapter", function() {
