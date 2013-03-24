@@ -13,10 +13,10 @@ describe("App.ContactsController", function() {
         {id: 2, first_name: 'Aaaron', last_name: 'Zeebob'},
         {id: 3, first_name: 'Zeus',   last_name: 'Aaardvaaark'},
       ]);
-    });
 
-    controller = App.ContactsController.create();
-    controller.set('content', store.findMany(App.Contact, [1, 2, 3]));
+      controller = App.ContactsController.create();
+      controller.set('content', store.findMany(App.Contact, [1, 2, 3]));
+    });
   });
 
   it("sorts by [lastName, firstName]", function() {
