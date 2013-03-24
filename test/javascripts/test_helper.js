@@ -6,7 +6,11 @@
 
 // Prevent automatic scheduling of runloops. For tests, we
 // want to have complete control of runloops.
-// TODO - Ember.testing = true;
+Ember.testing = true;
+
+// Workaround needed to prevent `App.initialize()` from being
+// scheduled. TODO: review `scheduleInitialize` in Ember itself.
+App.isInitialized = true;
 
 // Prevent the router from manipulating the browser's URL.
 App.Router.reopen({location: 'none'});
