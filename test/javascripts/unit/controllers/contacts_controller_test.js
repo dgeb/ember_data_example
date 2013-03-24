@@ -20,9 +20,9 @@ describe("App.ContactsController", function() {
   });
 
   it("sorts by [lastName, firstName]", function() {
-    assert.equal(controller.get('arrangedContent.length'), 3);
-    assert.equal(controller.get('arrangedContent').objectAt(0).get('id'), '3');
-    assert.equal(controller.get('arrangedContent').objectAt(1).get('id'), '2');
-    assert.equal(controller.get('arrangedContent').objectAt(2).get('id'), '1');
+    assert.equal(controller.get('length'), 3);
+    assert.equal(controller.objectAt(0).get('id'), '3');
+    assert.equal(controller.objectAt(1).get('id'), '2');
+    assert.equal(controller.objectAt(2).get('id'), '1');
   });
 });
