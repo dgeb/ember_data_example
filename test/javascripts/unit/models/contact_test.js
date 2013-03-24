@@ -1,7 +1,7 @@
 //= require test_helper
 
 describe("Models.App.Contact", function() {
-  var store;
+  var store, contact;
 
   beforeEach(function() {
     store = lookupStore();
@@ -14,37 +14,47 @@ describe("Models.App.Contact", function() {
 
   describe("fullName", function() {
     it("concatenates 'firstName' and 'lastName'", function() {
-      var contact = App.Contact.createRecord({
-        firstName: 'Joe',
-        lastName: 'Blow'
-      });
+      Ember.run(function() {
+        contact = App.Contact.createRecord({
+          firstName: 'Joe',
+          lastName: 'Blow'
+        });
+      })
       assert.equal(contact.get('fullName'), 'Joe Blow');
     });
 
     it("is '(No Name)' if an existing record has neither firstName nor lastName", function() {
-      store.load(App.Contact, {id: 1});
-      var contact = App.Contact.find(1);
+      Ember.run(function() {
+        store.load(App.Contact, {id: 1});
+        contact = App.Contact.find(1);
+      });
       assert.equal(contact.get('fullName'), '(No Name)');
     });
 
     it("is '(New Contact)' if a new record has neither firstName nor lastName", function() {
-      var contact = App.Contact.createRecord();
+      Ember.run(function() {
+        contact = App.Contact.createRecord();
+      });
       assert.equal(contact.get('fullName'), '(New Contact)');
     });
   });
 
   describe("gravatar", function() {
     it("uses the correct gravatar url", function() {
-      var emailMd5 = MD5('joe.blow@example.com');
-      var contact = App.Contact.createRecord({
-        email: 'joe.blow@example.com'
+      Ember.run(function() {
+        contact = App.Contact.createRecord({
+          email: 'joe.blow@example.com'
+        });
       });
+      var emailMd5 = MD5('joe.blow@example.com');
       assert.equal(contact.get('gravatar'), "http://www.gravatar.com/avatar/" + emailMd5);
     });
 
     it("uses an empty string if no email is provided", function() {
+      Ember.run(function() {
+        contact = App.Contact.createRecord();
+      });
       var emailMd5 = MD5('');
-      var contact = App.Contact.createRecord();
       assert.equal(contact.get('gravatar'), "http://www.gravatar.com/avatar/" + emailMd5);
     });
   });

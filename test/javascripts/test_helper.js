@@ -39,22 +39,15 @@ var appendView = function(view) {
 var server;
 
 beforeEach(function() {
-  Ember.run(function() {
-    // Fake XHR
-    server = sinon.fakeServer.create();
+  // Fake XHR
+  server = sinon.fakeServer.create();
 
+  Ember.run(function() {
     App.reset();
   });
-
-  // Begin a runloop for each test
-  // (note: individual tests may require further runloops)
-  Ember.run.begin();
 });
 
 afterEach(function() {
-  // End each test's runloop
-  Ember.run.end();
-
   // Restore XHR
   server.restore();
 });
