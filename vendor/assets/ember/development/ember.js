@@ -151,8 +151,8 @@ Ember.deprecateFunc = function(message, func) {
 
 })();
 
-// Version: v1.0.0-rc.1-223-g5934230
-// Last commit: 5934230 (2013-03-22 22:26:47 -0700)
+// Version: v1.0.0-rc.1-239-gedc818e
+// Last commit: edc818e (2013-03-24 17:17:37 -0700)
 
 
 (function() {
@@ -3741,6 +3741,24 @@ Ember.computed.alias = function(dependentKey) {
     } else {
       return get(this, dependentKey);
     }
+  });
+};
+
+/**
+  Creates a computed property that acts like a standard getter and setter,
+  but defaults to the value from `defaultPath`.
+
+  @method computed.defaultTo
+  @for Ember
+  @param {String} defaultPath
+*/
+Ember.computed.defaultTo = function(defaultPath) {
+  return Ember.computed(function(key, newValue, cachedValue) {
+    var result;
+    if (arguments.length === 1) {
+      return cachedValue != null ? cachedValue : get(this, defaultPath);
+    }
+    return newValue != null ? newValue : get(this, defaultPath);
   });
 };
 
@@ -15362,9 +15380,9 @@ Ember.View = Ember.CoreView.extend(
   willInsertElement: Ember.K,
 
   /**
-    Called when the element of the view has been inserted into the DOM.
-    Override this function to do any set up that requires an element in the
-    document body.
+    Called when the element of the view has been inserted into the DOM
+    or after the view was re-rendered. Override this function to do any
+    set up that requires an element in the document body.
 
     @event didInsertElement
   */
@@ -22774,11 +22792,12 @@ Ember.Handlebars.registerHelper('each', function(path, options) {
 */
 
 Ember.Handlebars.registerHelper('template', function(name, options) {
-  var template = Ember.TEMPLATES[name];
+  var view = options.data.view,
+      template = view.templateForName(name);
 
   Ember.assert("Unable to find template with name '"+name+"'.", !!template);
 
-  Ember.TEMPLATES[name](this, { data: options.data });
+  template(this, { data: options.data });
 });
 
 })();
@@ -22822,10 +22841,10 @@ Ember.Handlebars.registerHelper('partial', function(name, options) {
 
   nameParts[nameParts.length - 1] = "_" + lastPart;
 
-  var underscoredName = nameParts.join("/");
-
-  var template = Ember.TEMPLATES[underscoredName],
-      deprecatedTemplate = Ember.TEMPLATES[name];
+  var view = options.data.view,
+      underscoredName = nameParts.join("/"),
+      template = view.templateForName(underscoredName),
+      deprecatedTemplate = view.templateForName(name);
 
   Ember.deprecate("You tried to render the partial " + name + ", which should be at '" + underscoredName + "', but Ember found '" + name + "'. Please use a leading underscore in your partials", template);
   Ember.assert("Unable to find partial with name '"+name+"'.", template || deprecatedTemplate);
@@ -26210,7 +26229,25 @@ Ember.onLoad('Ember.Handlebars', function(Handlebars) {
     return ret.concat(resolvedPaths(linkView.parameters));
   }
 
-  var LinkView = Ember.View.extend({
+  /**
+    Renders a link to the supplied route.
+
+    When the rendered link matches the current route, and the same object instance is passed into the helper,
+    then the link is given class="active" by default.
+
+    You may re-open LinkView in order to change the default active class:
+
+    ``` javascript
+    Ember.LinkView.reopen({
+      activeClass: "is-active"
+    })
+    ```
+
+    @class LinkView
+    @namespace Ember
+    @extends Ember.View
+  **/
+  var LinkView = Ember.LinkView = Ember.View.extend({
     tagName: 'a',
     namedRoute: null,
     currentWhen: null,
@@ -27844,7 +27881,8 @@ var get = Ember.get, set = Ember.set,
   @namespace Ember
   @extends Ember.Namespace
 */
-var Application = Ember.Application = Ember.Namespace.extend({
+
+var Application = Ember.Application = Ember.Namespace.extend(Ember.DeferredMixin, {
 
   /**
     The root DOM element of the Application. This can be specified as an
@@ -27998,10 +28036,17 @@ var Application = Ember.Application = Ember.Namespace.extend({
   */
   scheduleInitialize: function() {
     var self = this;
-    this.$().ready(function() {
-      if (self.isDestroyed || self.isInitialized) { return; }
+
+    function initialize(){
+      if (self.isDestroyed) { return; }
       Ember.run.schedule('actions', self, 'initialize');
-    });
+    }
+
+    if (!this.$ || this.$.isReady) {
+      initialize();
+    } else {
+      this.$().ready(initialize);
+    }
   },
 
   /**
@@ -28127,8 +28172,11 @@ var Application = Ember.Application = Ember.Namespace.extend({
     this.buildContainer();
 
     this.isInitialized = false;
-    this.initialize();
-    this.startRouting();
+
+    Ember.run.schedule('actions', this, function(){
+      this.initialize();
+      this.startRouting();
+    });
   },
 
   /**
@@ -28168,6 +28216,8 @@ var Application = Ember.Application = Ember.Namespace.extend({
       Ember.Namespace.processAll();
       Ember.BOOTED = true;
     }
+
+    this.resolve(this);
   },
 
   /**
@@ -29716,8 +29766,8 @@ Ember States
 
 
 })();
-// Version: v1.0.0-rc.1-223-g5934230
-// Last commit: 5934230 (2013-03-22 22:26:47 -0700)
+// Version: v1.0.0-rc.1-239-gedc818e
+// Last commit: edc818e (2013-03-24 17:17:37 -0700)
 
 
 (function() {
