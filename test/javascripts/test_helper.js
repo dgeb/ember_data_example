@@ -2,21 +2,8 @@
 //= require sinon
 //= require application
 
-//**** Config Ember for testing ***
-
-// Prevent automatic scheduling of runloops. For tests, we
-// want to have complete control of runloops.
-Ember.testing = true;
-
-// Workaround needed to prevent `App.initialize()` from being
-// scheduled. TODO: review `scheduleInitialize` in Ember itself.
-App.isInitialized = true;
-
 // Prevent the router from manipulating the browser's URL.
 App.Router.reopen({location: 'none'});
-
-// Ensure that the app is rendered in Konacha's test div
-App.reopen({rootElement: '#konacha'});
 
 //**** Utility methods (for tests only - not for use in apps) ***
 
@@ -36,18 +23,45 @@ var appendView = function(view) {
 
 //**** Global before / after ***
 
+// Sinon fake server
 var server;
 
-beforeEach(function() {
+// Stub out Konacha.reset()
+Konacha.reset = Ember.K;
+
+// Defer App readiness until we're in an Ember runloop
+App.deferReadiness();
+
+beforeEach(function(done) {
   // Fake XHR
   server = sinon.fakeServer.create();
 
-  Ember.run(function() {
-    App.reset();
-  });
+  // Initialize App (if necessary)
+  if (App.isInitialized) {
+    done();
+  } else {
+    // Prevent automatic scheduling of runloops. For tests, we
+    // want to have complete control of runloops.
+    Ember.testing = true;
+
+    Ember.run(function() {
+      // Advance App readiness
+      App.advanceReadiness();
+
+      // When App readiness promise resolves, setup is complete
+      App.then(function(){
+        done();
+      });
+    });
+  }
 });
 
 afterEach(function() {
+  // Reset App
+  Ember.run(function() {
+    App.reset();
+  });
+
   // Restore XHR
   server.restore();
 });
