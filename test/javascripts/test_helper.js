@@ -29,31 +29,27 @@ var server;
 // Stub out Konacha.reset()
 Konacha.reset = Ember.K;
 
-// Defer App readiness until we're in an Ember runloop
-App.deferReadiness();
-
 beforeEach(function(done) {
   // Fake XHR
   server = sinon.fakeServer.create();
 
-  // Initialize App (if necessary)
-  if (App.isInitialized) {
-    done();
-  } else {
-    // Prevent automatic scheduling of runloops. For tests, we
-    // want to have complete control of runloops.
-    Ember.testing = true;
+  // Prevent automatic scheduling of runloops. For tests, we
+  // want to have complete control of runloops.
+  Ember.testing = true;
 
-    Ember.run(function() {
-      // Advance App readiness
-      App.advanceReadiness();
+  Ember.run(function() {
+    // Advance App readiness, which was deferred when the app
+    // was created.
+    //
+    // This needs to be done here, after each iframe has been setup,
+    // instead of in a global `before`.
+    App.advanceReadiness();
 
-      // When App readiness promise resolves, setup is complete
-      App.then(function(){
-        done();
-      });
+    // When App readiness promise resolves, setup is complete
+    App.then(function() {
+      done();
     });
-  }
+  });
 });
 
 afterEach(function() {
