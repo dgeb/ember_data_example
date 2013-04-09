@@ -1,6 +1,7 @@
 //= require konacha_config
 //= require sinon
 //= require application
+//= require chai-jquery
 
 // Prevent the router from manipulating the browser's URL.
 App.Router.reopen({location: 'none'});
@@ -36,6 +37,7 @@ beforeEach(function(done) {
   // Prevent automatic scheduling of runloops. For tests, we
   // want to have complete control of runloops.
   Ember.testing = true;
+
 
   Ember.run(function() {
     // Advance App readiness, which was deferred when the app
