@@ -1,0 +1,29 @@
+.control-group
+  label.control-label for="firstName" First name
+  .controls
+    Ember.TextField#firstName valueBinding="firstName" placeholder="First name" required="true"
+.control-group
+  label.control-label for="lastName" Last name
+  .controls
+    Ember.TextField#lastName valueBinding="lastName" placeholder="Last name" required="true"
+.control-group
+  label.control-label for="email" Email
+  .controls
+    Ember.TextField#email valueBinding="email" placeholder="Email"
+.control-group
+  label.control-label for="notes" Notes
+  .controls
+    Ember.TextField#notes valueBinding="notes" placeholder="Notes"
+.control-group
+  label.control-label for="phone" Phone
+  .controls
+    each phoneNumbers
+      .phone-number
+        .input-append
+          Ember.TextField valueBinding="number" placeholder="Number"
+          a.btn{action "removePhoneNumber" this}
+            i.icon-minus-sign
+            |  Remove
+    a.btn{action "addPhoneNumber"}
+      i.icon-plus-sign
+      |  Add a phone number

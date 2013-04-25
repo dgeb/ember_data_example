@@ -1,0 +1,6 @@
+form.form-horizontal submit=save
+  legend Edit Contact
+  partial "contact_edit_fields"
+  .well.well-small.btn-group
+    = submitButton "Update"
+    button.btn{action cancel} Cancel

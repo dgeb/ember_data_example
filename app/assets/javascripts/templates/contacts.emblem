@@ -1,0 +1,8 @@
+.span3
+  .well.sidebar-nav
+    ul.nav.nav-list
+      li.nav-header All contacts
+      each contact in controller
+        App.ContactInListView contentBinding='contact'
+.span9
+  outlet
