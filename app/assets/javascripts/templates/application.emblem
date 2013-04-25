@@ -6,7 +6,7 @@
       .btn-group.pull-right
         linkTo .btn 'contacts.new'
           i.icon-plus-sign
-          | Add Contact
+          |  Add Contact
 .container-fluid#main
   .row-fluid
     outlet

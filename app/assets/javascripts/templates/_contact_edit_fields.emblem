@@ -23,7 +23,7 @@
           Ember.TextField valueBinding="number" placeholder="Number"
           a.btn{action "removePhoneNumber" this}
             i.icon-minus-sign
-            | Remove
+            |  Remove
     a.btn{action "addPhoneNumber"}
       i.icon-plus-sign
-      | Add a phone number
+      |  Add a phone number
