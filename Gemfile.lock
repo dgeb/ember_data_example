@@ -56,6 +56,9 @@ GEM
       ember-source
       execjs
       handlebars-source
+    barber-emblem (0.1.1)
+      barber (>= 0.4.1)
+      emblem-source
     builder (3.0.4)
     capybara (2.0.2)
       mime-types (>= 1.16)
@@ -71,6 +74,10 @@ GEM
       ember-source
     ember-source (0.0.1)
       handlebars-source (>= 1.0.0.rc3, < 1.0.0.rc4)
+    emblem-rails (0.1.0)
+      barber-emblem (~> 0.1.1)
+      ember-rails (~> 0.11.1)
+    emblem-source (0.2.5)
     erubis (2.7.0)
     eventmachine (1.0.1)
     execjs (1.4.0)
@@ -193,6 +200,7 @@ DEPENDENCIES
   anjlab-bootstrap-rails (>= 2.1)
   capybara
   ember-rails!
+  emblem-rails
   jquery-rails
   konacha
   minitest
