@@ -1,0 +1,12 @@
+.navbar.navbar-fixed-top
+  .navbar-inner
+    .container-fluid
+      .brand
+        linkTo 'contacts' | Ember Contacts
+      .btn-group.pull-right
+        linkTo .btn 'contacts.new'
+          i.icon-plus-sign
+          | Add Contact
+.container-fluid#main
+  .row-fluid
+    outlet
