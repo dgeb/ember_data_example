@@ -1,0 +1,6 @@
+form.form-horizontal submit=save
+  legend Create Contact
+  partial "contact_edit_fields"
+  .well.well-small.btn-group
+    = submitButton "Create"
+    button.btn{action cancel} Cancel
