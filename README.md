@@ -53,6 +53,12 @@ To debug and run the tests in the browser, invoke:
 
 Please help improve this example by filing issues and pull requests!
 
+## Variations
+
+[Chandu Tennety](https://github.com/tennety) is maintaining a
+[fork of this project](https://github.com/tennety/ember_data_example) that uses
+[Emblem.js](http://emblemjs.com/) templates.
+
 ## License
 
 Copyright 2012 Dan Gebhardt. MIT License (see LICENSE for details).
