@@ -10,11 +10,11 @@ Ember.testing = true;
 // Prevent the router from manipulating the browser's URL.
 App.Router.reopen({location: 'none'});
 
-// Sinon fake server
-var server;
-
 // Stub out Konacha.reset()
 Konacha.reset = Ember.K;
+
+// Sinon fake server
+var server;
 
 beforeEach(function(done) {
   // Fake XHR
@@ -22,13 +22,11 @@ beforeEach(function(done) {
 
   Ember.run(function() {
     // Advance App readiness, which was deferred when the app
-    // was created.
-    //
-    // This needs to be done here, after each iframe has been setup,
-    // instead of in a global `before`.
+    // was created. This needs to be done here, after each iframe has been
+    // setup, instead of in a global `before`.
     App.advanceReadiness();
 
-    // When App readiness promise resolves, setup is complete
+    // Setup is complete when the App readiness promise resolves
     App.then(function() {
       done();
     });
@@ -36,10 +34,8 @@ beforeEach(function(done) {
 });
 
 afterEach(function() {
-  // Reset App
-  Ember.run(function() {
-    App.reset();
-  });
+  // Reset App state
+  App.reset();
 
   // Restore XHR
   server.restore();
