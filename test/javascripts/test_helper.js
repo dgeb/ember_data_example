@@ -3,6 +3,10 @@
 //= require application
 //= require test_utils
 
+// Prevent automatic scheduling of runloops. For tests, we
+// want to have complete control of runloops.
+Ember.testing = true;
+
 // Prevent the router from manipulating the browser's URL.
 App.Router.reopen({location: 'none'});
 
@@ -15,10 +19,6 @@ Konacha.reset = Ember.K;
 beforeEach(function(done) {
   // Fake XHR
   server = sinon.fakeServer.create();
-
-  // Prevent automatic scheduling of runloops. For tests, we
-  // want to have complete control of runloops.
-  Ember.testing = true;
 
   Ember.run(function() {
     // Advance App readiness, which was deferred when the app
