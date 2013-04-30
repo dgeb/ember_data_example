@@ -1,27 +1,10 @@
 //= require konacha_config
 //= require sinon
 //= require application
+//= require test_utils
 
 // Prevent the router from manipulating the browser's URL.
 App.Router.reopen({location: 'none'});
-
-//**** Utility methods (for tests only - not for use in apps) ***
-
-var lookupStore = function() {
-  return App.__container__.lookup('store:main');
-}
-
-var lookupRouter = function() {
-  return App.__container__.lookup('router:main');
-}
-
-var appendView = function(view) {
-  Ember.run(function() {
-    view.append('#konacha');
-  });
-};
-
-//**** Global before / after ***
 
 // Sinon fake server
 var server;
