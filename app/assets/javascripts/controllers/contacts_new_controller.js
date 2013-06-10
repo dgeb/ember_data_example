@@ -2,7 +2,7 @@ App.ContactsNewController = Em.ObjectController.extend({
   startEditing: function() {
     // create a new record on a local transaction
     this.transaction = this.get('store').transaction();
-    this.set('content', this.transaction.createRecord(App.Contact, {}));
+    this.set('model', this.transaction.createRecord(App.Contact, {}));
   },
 
   stopEditing: function() {
@@ -22,10 +22,10 @@ App.ContactsNewController = Em.ObjectController.extend({
   transitionAfterSave: function() {
     // when creating new records, it's necessary to wait for the record to be assigned
     // an id before we can transition to its route (which depends on its id)
-    if (this.get('content.id')) {
-      this.transitionToRoute('contact', this.get('content'));
+    if (this.get('model.id')) {
+      this.transitionToRoute('contact', this.get('model'));
     }
-  }.observes('content.id'),
+  }.observes('model.id'),
 
   cancel: function() {
     this.stopEditing();
@@ -33,7 +33,7 @@ App.ContactsNewController = Em.ObjectController.extend({
   },
 
   addPhoneNumber: function() {
-    this.get('content.phoneNumbers').createRecord();
+    this.get('model.phoneNumbers').createRecord();
   },
 
   removePhoneNumber: function(phoneNumber) {

@@ -4,7 +4,7 @@ App.ContactController = Em.ObjectController.extend({
 
   startEditing: function() {
     var contactEditController = this.get('controllers.contactEdit');
-    contactEditController.set('content', this.get('content'));
+    contactEditController.set('model', this.get('model'));
     contactEditController.startEditing();
     this.set('isEditing', true);
   },
@@ -17,7 +17,7 @@ App.ContactController = Em.ObjectController.extend({
 
   destroyRecord: function() {
     if (window.confirm("Are you sure you want to delete this contact?")) {
-      this.get('content').deleteRecord();
+      this.get('model').deleteRecord();
       this.get('store').commit();
 
       // return to the main contacts listing page

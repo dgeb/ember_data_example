@@ -3,7 +3,7 @@ App.ContactEditController = Em.ObjectController.extend({
 
   startEditing: function() {
     // add the contact and its associated phone numbers to a local transaction
-    var contact = this.get('content');
+    var contact = this.get('model');
     var transaction = contact.get('store').transaction();
     transaction.add(contact);
     contact.get('phoneNumbers').forEach(function(phoneNumber) {
@@ -32,7 +32,7 @@ App.ContactEditController = Em.ObjectController.extend({
   },
 
   addPhoneNumber: function() {
-    this.get('content.phoneNumbers').createRecord();
+    this.get('model.phoneNumbers').createRecord();
   },
 
   removePhoneNumber: function(phoneNumber) {
