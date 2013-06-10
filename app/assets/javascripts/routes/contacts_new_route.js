@@ -6,6 +6,7 @@ App.ContactsNewRoute = Ember.Route.extend({
   },
 
   setupController: function(controller) {
+    this._super.apply(this, arguments);
     controller.startEditing();
   },
 
