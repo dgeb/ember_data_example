@@ -1,8 +1,8 @@
 GIT
   remote: git://github.com/emberjs/ember-rails.git
-  revision: d4d951db5837059807ea4e3a1033a5920e10d2d1
+  revision: 243c9b4e420bfdeb7a63e43cdf00fb15cbace3d4
   specs:
-    ember-rails (0.12.0)
+    ember-rails (0.13.0)
       active_model_serializers
       barber (>= 0.4.1)
       ember-data-source
@@ -13,10 +13,10 @@ GIT
 
 GIT
   remote: git://github.com/rails-api/active_model_serializers.git
-  revision: 731528e1f6ac91081f94e25f71ab5ef07cd8c698
+  revision: cee570557627af55ee6b00571eabfee37094bb7b
   specs:
     active_model_serializers (0.8.1)
-      activemodel (>= 3.0)
+      activemodel (>= 3.2)
 
 GEM
   remote: http://rubygems.org/
@@ -68,9 +68,9 @@ GEM
     childprocess (0.3.9)
       ffi (~> 1.0, >= 1.0.11)
     colorize (0.5.8)
-    ember-data-source (0.0.5)
+    ember-data-source (0.13)
       ember-source
-    ember-source (1.0.0.rc3.4)
+    ember-source (1.0.0.rc6)
       handlebars-source (= 1.0.0.rc4)
     erubis (2.7.0)
     eventmachine (1.0.1)
@@ -80,7 +80,7 @@ GEM
       eventmachine (>= 0.12.0)
     ffi (1.4.0)
     handlebars-source (1.0.0.rc4)
-    hike (1.2.2)
+    hike (1.2.3)
     http_parser.rb (0.5.3)
     i18n (0.6.4)
     journey (1.0.4)
@@ -114,7 +114,7 @@ GEM
       minitest-capybara (~> 0.1)
       minitest-matchers (>= 1.2)
       minitest-rails (~> 0.5)
-    multi_json (1.7.3)
+    multi_json (1.7.7)
     nokogiri (1.5.6)
     poltergeist (1.1.0)
       capybara (~> 2.0, >= 2.0.1)
@@ -143,7 +143,7 @@ GEM
       rake (>= 0.8.7)
       rdoc (~> 3.4)
       thor (>= 0.14.6, < 2.0)
-    rake (10.0.4)
+    rake (10.1.0)
     rdoc (3.12.2)
       json (~> 1.4)
     ref (1.0.2)
@@ -194,6 +194,7 @@ DEPENDENCIES
   anjlab-bootstrap-rails (>= 2.1)
   capybara
   ember-rails!
+  ember-source (= 1.0.0.rc6)
   handlebars-source (= 1.0.0.rc4)
   jquery-rails
   konacha
