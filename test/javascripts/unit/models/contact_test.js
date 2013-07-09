@@ -1,6 +1,6 @@
 //= require test_helper
 
-describe("Models.App.Contact", function() {
+describe("Models: App.Contact", function() {
   var store, contact;
 
   beforeEach(function() {

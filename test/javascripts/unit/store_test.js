@@ -1,7 +1,7 @@
 //= require test_helper
 //= require store
 
-describe("App.Store", function() {
+describe("Data: App.Store", function() {
   var store;
 
   beforeEach(function() {

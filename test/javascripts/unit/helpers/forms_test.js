@@ -1,6 +1,6 @@
 //= require test_helper
 
-describe("Handlebars", function() {
+describe("Helpers", function() {
   var view;
 
   describe("submitButton", function() {

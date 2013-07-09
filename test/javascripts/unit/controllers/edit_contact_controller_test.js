@@ -1,5 +1,5 @@
 //= require test_helper
 
-describe("App.ContactEditController", function() {
+describe("Controllers: App.ContactEditController", function() {
   // TODO - fill out tests
 });

@@ -1,6 +1,6 @@
 //= require test_helper
 
-describe("App.ContactsController", function() {
+describe("Controllers: App.ContactsController", function() {
   var controller,
       store;
 
