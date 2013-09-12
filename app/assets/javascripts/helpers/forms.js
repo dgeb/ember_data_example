@@ -4,6 +4,6 @@ Handlebars.registerHelper('submitButton', function(text) {
 
 Ember.Handlebars.registerBoundHelper('mailto', function(address) {
   if (address) {
-    return new Handlebars.SafeString('<a href="mailto: ' + address + '" />' + address + '</a>');
+    return new Handlebars.SafeString('<a href="mailto:' + address + '" />' + address + '</a>');
   }
 });
