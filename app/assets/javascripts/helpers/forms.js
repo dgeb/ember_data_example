@@ -1,4 +1,4 @@
-Ember.Handlebars.helper('submitButton', function(text) {
+Ember.Handlebars.registerHelper('submitButton', function(text) {
   return new Handlebars.SafeString('<button type="submit" class="btn btn-primary">' + text + '</button>');
 });
 
