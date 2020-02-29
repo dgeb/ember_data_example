@@ -94,7 +94,7 @@ GEM
       colorize
       railties (>= 3.1, < 5)
       sprockets
-    libv8 (3.11.8.13)
+    libv8 (3.16.14.19)
     mail (2.4.4)
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
@@ -143,10 +143,10 @@ GEM
       rake (>= 0.8.7)
       rdoc (~> 3.4)
       thor (>= 0.14.6, < 2.0)
-    rake (10.1.0)
+    rake (13.0.1)
     rdoc (3.12.2)
       json (~> 1.4)
-    ref (1.0.2)
+    ref (2.0.0)
     rubyzip (0.9.9)
     sass (3.2.5)
     sass-rails (3.2.6)
@@ -168,8 +168,8 @@ GEM
       actionpack (~> 3.0)
       activemodel (~> 3.0)
       railties (~> 3.0)
-    therubyracer (0.11.4)
-      libv8 (~> 3.11.8.12)
+    therubyracer (0.12.3)
+      libv8 (~> 3.16.14.15)
       ref
     thor (0.18.1)
     tilt (1.4.1)
@@ -206,6 +206,6 @@ DEPENDENCIES
   sass-rails
   sqlite3
   strong_parameters
-  therubyracer
+  therubyracer (~> 0.12.0)
   turn (~> 0.8.3)
   uglifier
