@@ -94,12 +94,13 @@ GEM
       colorize
       railties (>= 3.1, < 5)
       sprockets
-    libv8 (3.11.8.13)
+    libv8 (3.16.14.19)
     mail (2.4.4)
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.21)
+    mini_portile2 (2.8.0)
     minitest (4.6.0)
     minitest-capybara (0.1.0)
       capybara (>= 1.0)
@@ -115,12 +116,15 @@ GEM
       minitest-matchers (>= 1.2)
       minitest-rails (~> 0.5)
     multi_json (1.7.7)
-    nokogiri (1.5.6)
+    nokogiri (1.13.3)
+      mini_portile2 (~> 2.8.0)
+      racc (~> 1.4)
     poltergeist (1.1.0)
       capybara (~> 2.0, >= 2.0.1)
       faye-websocket (~> 0.4, >= 0.4.4)
       http_parser.rb (~> 0.5.3)
     polyglot (0.3.3)
+    racc (1.6.0)
     rack (1.4.5)
     rack-cache (1.2)
       rack (>= 0.4)
@@ -146,7 +150,7 @@ GEM
     rake (10.1.0)
     rdoc (3.12.2)
       json (~> 1.4)
-    ref (1.0.2)
+    ref (2.0.0)
     rubyzip (0.9.9)
     sass (3.2.5)
     sass-rails (3.2.6)
@@ -168,8 +172,8 @@ GEM
       actionpack (~> 3.0)
       activemodel (~> 3.0)
       railties (~> 3.0)
-    therubyracer (0.11.4)
-      libv8 (~> 3.11.8.12)
+    therubyracer (0.12.3)
+      libv8 (~> 3.16.14.15)
       ref
     thor (0.18.1)
     tilt (1.4.1)
@@ -206,6 +210,6 @@ DEPENDENCIES
   sass-rails
   sqlite3
   strong_parameters
-  therubyracer
+  therubyracer (~> 0.12.0)
   turn (~> 0.8.3)
   uglifier
